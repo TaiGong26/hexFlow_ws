@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>hex_flow_ros</name>
+  <version>0.0.1</version>
+  <description>HexFlow ROS 2 main package</description>
+  <maintainer email="847235539@qq.com">Dong Zhaorui</maintainer>
+  <license>Apache-2.0</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>builtin_interfaces</exec_depend>
+  <exec_depend>hex_flow_ros_msg</exec_depend>
+  <exec_depend>hex_driver_camera</exec_depend>
+  <exec_depend>hex_driver_robot</exec_depend>
+  <exec_depend>hex_driver_mujoco</exec_depend>
+  <exec_depend>hex_util_runtime</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

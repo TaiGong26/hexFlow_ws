@@ -1,0 +1,10 @@
+builtin_interfaces/Time stamp
+uint8 ctrl_mode
+float64[1] jnt_pos
+float64[1] jnt_vel
+float64[1] jnt_eff
+float64 grip_force
+float64[1] mit_tau
+float64[1] mit_kp
+float64[1] mit_kd
+float64 lim_err

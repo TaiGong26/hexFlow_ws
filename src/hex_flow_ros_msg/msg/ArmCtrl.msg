@@ -1,0 +1,13 @@
+builtin_interfaces/Time stamp
+uint8 ctrl_mode
+float64[6] jnt_pos
+float64[6] jnt_vel
+float64[6] jnt_eff
+float64[3] pose_pos
+float64[4] pose_quat
+float64[6] mit_tau
+float64[6] mit_kp
+float64[6] mit_kd
+float64 lim_err
+float64[6] lim_vel
+float64[6] lim_acc
