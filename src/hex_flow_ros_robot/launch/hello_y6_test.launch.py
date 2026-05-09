@@ -4,7 +4,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     robot_node = Node(
-        package='hex_flow_ros',
+        package='hex_flow_ros_robot',
         executable='hex-robot-hello-y6',
         name='robot_hello_y6',
         output='screen',
@@ -21,7 +21,7 @@ def generate_launch_description():
     )
 
     test_node = Node(
-        package='hex_flow_ros',
+        package='hex_flow_ros_robot',
         executable='hex-robot-hello-y6-test',
         name='robot_hello_y6_test',
         output='screen',

@@ -2,8 +2,8 @@ import threading
 import traceback
 
 import numpy as np
-from hex_flow_ros.interface import DataInterface
-from hex_flow_ros.ctrl_mode import ArmCtrlMode, GripCtrlMode
+from hex_flow_ros_common.interface import DataInterface
+from hex_flow_ros_common.ctrl_mode import ArmCtrlMode, GripCtrlMode
 from hex_flow_ros_msg.msg import ArmState, ArmCtrl, GripState, GripCtrl
 from sensor_msgs.msg import Joy
 

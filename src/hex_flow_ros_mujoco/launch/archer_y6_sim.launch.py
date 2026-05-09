@@ -52,7 +52,7 @@ def generate_launch_description():
     sim_group = GroupAction([
         PushRosNamespace('sim'),
         Node(
-            package='hex_flow_ros',
+            package='hex_flow_ros_mujoco',
             executable='hex-mujoco-archer-y6',
             name='mujoco_archer_y6',
             output='screen',
@@ -72,7 +72,7 @@ def generate_launch_description():
     teleop_group = GroupAction([
         PushRosNamespace('teleop'),
         Node(
-            package='hex_flow_ros',
+            package='hex_flow_ros_teleop',
             executable='hex-teleop-keyboard',
             name='teleop_keyboard',
             output='screen',
@@ -80,7 +80,7 @@ def generate_launch_description():
             condition=IfCondition(LaunchConfiguration('enable_keyboard')),
         ),
         Node(
-            package='hex_flow_ros',
+            package='hex_flow_ros_teleop',
             executable='hex-teleop-joystick',
             name='teleop_joystick',
             output='screen',

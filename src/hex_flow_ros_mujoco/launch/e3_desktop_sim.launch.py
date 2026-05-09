@@ -57,7 +57,7 @@ def generate_launch_description():
     sim_group = GroupAction([
         PushRosNamespace('sim'),
         Node(
-            package='hex_flow_ros',
+            package='hex_flow_ros_mujoco',
             executable='hex-mujoco-e3-desktop',
             name='mujoco_e3_desktop',
             output='screen',

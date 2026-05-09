@@ -4,7 +4,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     cam_node = Node(
-        package='hex_flow_ros',
+        package='hex_flow_ros_camera',
         executable='hex-cam-usb',
         name='cam_usb',
         output='screen',
@@ -20,7 +20,7 @@ def generate_launch_description():
     )
 
     test_node = Node(
-        package='hex_flow_ros',
+        package='hex_flow_ros_camera',
         executable='hex-cam-usb-test',
         name='cam_usb_test',
         output='screen',

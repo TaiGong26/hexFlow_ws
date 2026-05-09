@@ -58,7 +58,7 @@ def generate_launch_description():
     robot_group = GroupAction([
         PushRosNamespace('robot'),
         Node(
-            package='hex_flow_ros',
+            package='hex_flow_ros_robot',
             executable='hex-robot-archer-y6',
             name='robot_archer_y6',
             output='screen',
@@ -77,7 +77,7 @@ def generate_launch_description():
     teleop_group = GroupAction([
         PushRosNamespace('teleop'),
         Node(
-            package='hex_flow_ros',
+            package='hex_flow_ros_robot',
             executable='hex-teleop-keyboard',
             name='teleop_keyboard',
             output='screen',
@@ -85,7 +85,7 @@ def generate_launch_description():
             condition=IfCondition(LaunchConfiguration('enable_keyboard')),
         ),
         Node(
-            package='hex_flow_ros',
+            package='hex_flow_ros_robot',
             executable='hex-teleop-joystick',
             name='teleop_joystick',
             output='screen',

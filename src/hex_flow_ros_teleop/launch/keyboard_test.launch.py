@@ -5,7 +5,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
 
     kb_node = Node(
-        package='hex_flow_ros',
+        package='hex_flow_ros_teleop',
         executable='hex-teleop-keyboard',
         name='teleop_keyboard',
         output='screen',
@@ -14,7 +14,7 @@ def generate_launch_description():
     )
 
     test_node = Node(
-        package='hex_flow_ros',
+        package='hex_flow_ros_teleop',
         executable='hex-teleop-keyboard-test',
         name='teleop_keyboard_test',
         output='screen',

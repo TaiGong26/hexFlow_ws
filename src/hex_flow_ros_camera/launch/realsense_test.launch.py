@@ -4,7 +4,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     cam_node = Node(
-        package='hex_flow_ros',
+        package='hex_flow_ros_camera',
         executable='hex-cam-realsense',
         name='cam_realsense',
         output='screen',
@@ -21,7 +21,7 @@ def generate_launch_description():
     )
 
     test_node = Node(
-        package='hex_flow_ros',
+        package='hex_flow_ros_camera',
         executable='hex-cam-realsense-test',
         name='cam_realsense_test',
         output='screen',

@@ -5,7 +5,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
 
     joy_node = Node(
-        package='hex_flow_ros',
+        package='hex_flow_ros_teleop',
         executable='hex-teleop-joystick',
         name='teleop_joystick',
         output='screen',
@@ -14,7 +14,7 @@ def generate_launch_description():
     )
 
     test_node = Node(
-        package='hex_flow_ros',
+        package='hex_flow_ros_teleop',
         executable='hex-teleop-joystick-test',
         name='teleop_joystick_test',
         output='screen',
