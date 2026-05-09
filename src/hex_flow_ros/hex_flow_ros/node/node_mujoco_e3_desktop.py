@@ -4,56 +4,34 @@ import numpy as np
 from hex_driver_mujoco import HexMujocoE3DesktopCallback, HexMujocoE3DesktopParams
 from hex_flow_ros.interface import DataInterface
 from hex_flow_ros.ctrl_mode import ArmCtrlMode, GripCtrlMode
+from hex_flow_ros.msg_convert import ros_ctrl_to_driver_cmd, ros_grip_ctrl_to_driver_cmd
 from hex_flow_ros_msg.msg import ArmState, ArmCtrl, GripState, GripCtrl
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import Image
 from std_msgs.msg import Bool
 
 
-def _ros_ctrl_to_driver_cmd(msg, dof=6):
-    return {
-        "ts_ns": int(msg.stamp.sec * 1e9 + msg.stamp.nanosec),
-        "ctrl_mode": msg.ctrl_mode,
-        "jnt_pos": np.array(msg.jnt_pos, dtype=np.float64) if len(msg.jnt_pos) == dof else np.zeros(dof),
-        "jnt_vel": np.array(msg.jnt_vel, dtype=np.float64) if len(msg.jnt_vel) == dof else np.zeros(dof),
-        "jnt_eff": np.array(msg.jnt_eff, dtype=np.float64) if len(msg.jnt_eff) == dof else np.zeros(dof),
-        "pose_pos": np.array(msg.pose_pos, dtype=np.float64),
-        "pose_quat": np.array(msg.pose_quat, dtype=np.float64),
-        "mit_tau": np.array(msg.mit_tau, dtype=np.float64) if len(msg.mit_tau) == dof else np.zeros(dof),
-        "mit_kp": np.array(msg.mit_kp, dtype=np.float64) if len(msg.mit_kp) == dof else np.zeros(dof),
-        "mit_kd": np.array(msg.mit_kd, dtype=np.float64) if len(msg.mit_kd) == dof else np.zeros(dof),
-        "lim_err": msg.lim_err,
-        "lim_vel": np.array(msg.lim_vel, dtype=np.float64) if len(msg.lim_vel) == dof else np.zeros(dof),
-        "lim_acc": np.array(msg.lim_acc, dtype=np.float64) if len(msg.lim_acc) == dof else np.zeros(dof),
-    }
-
-
-def _ros_grip_ctrl_to_driver_cmd(msg, dof=1):
-    return {
-        "ts_ns": int(msg.stamp.sec * 1e9 + msg.stamp.nanosec),
-        "ctrl_mode": msg.ctrl_mode,
-        "jnt_pos": np.array(msg.jnt_pos, dtype=np.float64) if len(msg.jnt_pos) == dof else np.zeros(dof),
-        "jnt_vel": np.array(msg.jnt_vel, dtype=np.float64) if len(msg.jnt_vel) == dof else np.zeros(dof),
-        "jnt_eff": np.array(msg.jnt_eff, dtype=np.float64) if len(msg.jnt_eff) == dof else np.zeros(dof),
-        "grip_force": msg.grip_force,
-        "mit_tau": np.array(msg.mit_tau, dtype=np.float64) if len(msg.mit_tau) == dof else np.zeros(dof),
-        "mit_kp": np.array(msg.mit_kp, dtype=np.float64) if len(msg.mit_kp) == dof else np.zeros(dof),
-        "mit_kd": np.array(msg.mit_kd, dtype=np.float64) if len(msg.mit_kd) == dof else np.zeros(dof),
-        "lim_err": msg.lim_err,
-    }
-
-
 def main():
     interface = DataInterface("mujoco_e3_desktop", rate_hz=500.0)
 
+    # ============ parameter ============
+    # state_rate: state publish rate(Hz) → HexMujocoE3DesktopParams → driver state loop
     interface.set_parameter("state_rate", 1000.0)
+    # cam_rate: camera capture rate(Hz) → driver camera loop
     interface.set_parameter("cam_rate", 30.0)
+    # headless: run Mujoco without GUI → driver render config
     interface.set_parameter("headless", False)
+    # state_buffer_size: state buffer size → driver state cache
     interface.set_parameter("state_buffer_size", 200)
+    # cam_buffer_size: camera buffer size → driver frame cache
     interface.set_parameter("cam_buffer_size", 8)
+    # sens_ts: clock source(true=device clock/false=system clock) → driver timestamp
     interface.set_parameter("sens_ts", False)
+    # head_cam_type: head camera type → driver camera config
     interface.set_parameter("head_cam_type", "empty")
+    # left_cam_type: left arm camera type → driver camera config
     interface.set_parameter("left_cam_type", "empty")
+    # right_cam_type: right arm camera type → driver camera config
     interface.set_parameter("right_cam_type", "empty")
 
     params = HexMujocoE3DesktopParams(
@@ -70,7 +48,7 @@ def main():
         },
     )
 
-    # ---- Publishers (11, relative topics, namespace /sim) ----
+    # ============ publisher ============
     arm_state_pubs = {}
     grip_state_pubs = {}
     for side in ("left", "right"):
@@ -89,7 +67,7 @@ def main():
         depth_pubs[cam] = interface.create_publisher(
             f"{cam}_depth", Image, 10)
 
-    # ---- Buffered Subscriptions (5, polling mode) ----
+    # ============ buffered subscription ============
     for side in ("left", "right"):
         interface.create_subscription_buffered(
             f"{side}_arm_ctrl", ArmCtrl, maxlen=1, queue_size=1)
@@ -98,9 +76,7 @@ def main():
     interface.create_subscription_buffered(
         "reset", Bool, maxlen=1, queue_size=1)
 
-    sim = None
-
-    # ---- Driver callbacks ----
+    # ============ driver callbacks ============
     def _make_arm_state_cb(side):
         def cb(state):
             try:
@@ -190,18 +166,19 @@ def main():
         callbacks[f"{cam}_color_img"] = _make_color_img_cb(cam)
         callbacks[f"{cam}_depth_img"] = _make_depth_img_cb(cam)
 
+    # ============ driver ============
+    sim = None
     try:
         sim = HexMujocoE3DesktopCallback(params, callbacks=callbacks)
         sim.start()
 
         while interface.ok():
-            interface.sleep()  # 500 Hz
+            interface.sleep()
 
             for side in ("left", "right"):
-                # Poll arm_ctrl
                 msg = interface.get(f"{side}_arm_ctrl", latest=True)
                 if msg is not None:
-                    cmd = _ros_ctrl_to_driver_cmd(msg, dof=6)
+                    cmd = ros_ctrl_to_driver_cmd(msg, dof=6)
                     mode = msg.ctrl_mode
                     fn_map = {
                         ArmCtrlMode.MIT: getattr(sim, f"set_{side}_arm_mit_cmd"),
@@ -215,10 +192,9 @@ def main():
                     if fn is not None:
                         fn(cmd)
 
-                # Poll grip_ctrl
                 msg = interface.get(f"{side}_grip_ctrl", latest=True)
                 if msg is not None:
-                    cmd = _ros_grip_ctrl_to_driver_cmd(msg, dof=1)
+                    cmd = ros_grip_ctrl_to_driver_cmd(msg, dof=1)
                     mode = msg.ctrl_mode
                     fn_map = {
                         GripCtrlMode.MIT: getattr(sim, f"set_{side}_grip_mit_cmd"),
@@ -230,7 +206,6 @@ def main():
                     if fn is not None:
                         fn(cmd)
 
-            # Poll reset
             msg = interface.get("reset", latest=True)
             if msg is not None and msg.data:
                 sim.reset()

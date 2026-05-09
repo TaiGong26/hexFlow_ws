@@ -4,51 +4,27 @@ import numpy as np
 from hex_driver_robot import HexRobotFireflyY6Callback, HexRobotFireflyY6Params
 from hex_flow_ros.interface import DataInterface
 from hex_flow_ros.ctrl_mode import ArmCtrlMode, GripCtrlMode
+from hex_flow_ros.msg_convert import ros_ctrl_to_driver_cmd, ros_grip_ctrl_to_driver_cmd
 from hex_flow_ros_msg.msg import ArmState, ArmCtrl, GripState, GripCtrl
-
-
-def _ros_ctrl_to_driver_cmd(msg, dof=6):
-    return {
-        "ts_ns": int(msg.stamp.sec * 1e9 + msg.stamp.nanosec),
-        "ctrl_mode": msg.ctrl_mode,
-        "jnt_pos": np.array(msg.jnt_pos, dtype=np.float64) if len(msg.jnt_pos) == dof else np.zeros(dof),
-        "jnt_vel": np.array(msg.jnt_vel, dtype=np.float64) if len(msg.jnt_vel) == dof else np.zeros(dof),
-        "jnt_eff": np.array(msg.jnt_eff, dtype=np.float64) if len(msg.jnt_eff) == dof else np.zeros(dof),
-        "pose_pos": np.array(msg.pose_pos, dtype=np.float64),
-        "pose_quat": np.array(msg.pose_quat, dtype=np.float64),
-        "mit_tau": np.array(msg.mit_tau, dtype=np.float64) if len(msg.mit_tau) == dof else np.zeros(dof),
-        "mit_kp": np.array(msg.mit_kp, dtype=np.float64) if len(msg.mit_kp) == dof else np.zeros(dof),
-        "mit_kd": np.array(msg.mit_kd, dtype=np.float64) if len(msg.mit_kd) == dof else np.zeros(dof),
-        "lim_err": msg.lim_err,
-        "lim_vel": np.array(msg.lim_vel, dtype=np.float64) if len(msg.lim_vel) == dof else np.zeros(dof),
-        "lim_acc": np.array(msg.lim_acc, dtype=np.float64) if len(msg.lim_acc) == dof else np.zeros(dof),
-    }
-
-
-def _ros_grip_ctrl_to_driver_cmd(msg, dof=1):
-    return {
-        "ts_ns": int(msg.stamp.sec * 1e9 + msg.stamp.nanosec),
-        "ctrl_mode": msg.ctrl_mode,
-        "jnt_pos": np.array(msg.jnt_pos, dtype=np.float64) if len(msg.jnt_pos) == dof else np.zeros(dof),
-        "jnt_vel": np.array(msg.jnt_vel, dtype=np.float64) if len(msg.jnt_vel) == dof else np.zeros(dof),
-        "jnt_eff": np.array(msg.jnt_eff, dtype=np.float64) if len(msg.jnt_eff) == dof else np.zeros(dof),
-        "grip_force": msg.grip_force,
-        "mit_tau": np.array(msg.mit_tau, dtype=np.float64) if len(msg.mit_tau) == dof else np.zeros(dof),
-        "mit_kp": np.array(msg.mit_kp, dtype=np.float64) if len(msg.mit_kp) == dof else np.zeros(dof),
-        "mit_kd": np.array(msg.mit_kd, dtype=np.float64) if len(msg.mit_kd) == dof else np.zeros(dof),
-        "lim_err": msg.lim_err,
-    }
 
 
 def main():
     interface = DataInterface("robot_firefly_y6", rate_hz=1.0)
 
+    # ============ parameter ============
+    # host: robot controller IP → HexRobotFireflyY6Params → driver connection target
     interface.set_parameter("host", "192.168.1.100")
+    # port: robot controller port → driver connection target
     interface.set_parameter("port", 8439)
+    # ctrl_rate: control loop rate(Hz) → driver control loop
     interface.set_parameter("ctrl_rate", 500.0)
+    # state_buffer_size: state buffer size → driver state cache
     interface.set_parameter("state_buffer_size", 200)
+    # sens_ts: clock source(true=device clock/false=system clock) → driver timestamp
     interface.set_parameter("sens_ts", False)
+    # grip_type: gripper type → driver gripper config
     interface.set_parameter("grip_type", "gp80")
+    # pose_end_in_flange: end-effector pose relative to flange → driver kinematics
     interface.set_parameter("pose_end_in_flange",
                             [0.187, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0])
 
@@ -63,6 +39,7 @@ def main():
             interface.get_parameter("pose_end_in_flange"), dtype=np.float64),
     )
 
+    # ============ publisher ============
     arm_state_pub = interface.create_publisher("arm_state", ArmState, 10)
     grip_state_pub = interface.create_publisher("grip_state", GripState, 10)
 
@@ -92,6 +69,7 @@ def main():
         except Exception:
             traceback.print_exc()
 
+    # ============ driver ============
     try:
         robot = HexRobotFireflyY6Callback(params, callbacks={
             "arm_state": arm_state_cb,
@@ -100,7 +78,7 @@ def main():
 
         def node_arm_ctrl_cb(msg):
             try:
-                cmd = _ros_ctrl_to_driver_cmd(msg, dof=6)
+                cmd = ros_ctrl_to_driver_cmd(msg, dof=6)
                 mode = msg.ctrl_mode
                 if mode == ArmCtrlMode.MIT:
                     robot.set_arm_mit_cmd(cmd)
@@ -119,7 +97,7 @@ def main():
 
         def node_grip_ctrl_cb(msg):
             try:
-                cmd = _ros_grip_ctrl_to_driver_cmd(msg, dof=1)
+                cmd = ros_grip_ctrl_to_driver_cmd(msg, dof=1)
                 mode = msg.ctrl_mode
                 if mode == GripCtrlMode.MIT:
                     robot.set_grip_mit_cmd(cmd)

@@ -4,54 +4,30 @@ import numpy as np
 from hex_driver_mujoco import HexMujocoArcherY6Callback, HexMujocoArcherY6Params
 from hex_flow_ros.interface import DataInterface
 from hex_flow_ros.ctrl_mode import ArmCtrlMode, GripCtrlMode
+from hex_flow_ros.msg_convert import ros_ctrl_to_driver_cmd, ros_grip_ctrl_to_driver_cmd
 from hex_flow_ros_msg.msg import ArmState, ArmCtrl, GripState, GripCtrl
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import Image
 from std_msgs.msg import Bool
 
 
-def _ros_ctrl_to_driver_cmd(msg, dof=6):
-    return {
-        "ts_ns": int(msg.stamp.sec * 1e9 + msg.stamp.nanosec),
-        "ctrl_mode": msg.ctrl_mode,
-        "jnt_pos": np.array(msg.jnt_pos, dtype=np.float64) if len(msg.jnt_pos) == dof else np.zeros(dof),
-        "jnt_vel": np.array(msg.jnt_vel, dtype=np.float64) if len(msg.jnt_vel) == dof else np.zeros(dof),
-        "jnt_eff": np.array(msg.jnt_eff, dtype=np.float64) if len(msg.jnt_eff) == dof else np.zeros(dof),
-        "pose_pos": np.array(msg.pose_pos, dtype=np.float64),
-        "pose_quat": np.array(msg.pose_quat, dtype=np.float64),
-        "mit_tau": np.array(msg.mit_tau, dtype=np.float64) if len(msg.mit_tau) == dof else np.zeros(dof),
-        "mit_kp": np.array(msg.mit_kp, dtype=np.float64) if len(msg.mit_kp) == dof else np.zeros(dof),
-        "mit_kd": np.array(msg.mit_kd, dtype=np.float64) if len(msg.mit_kd) == dof else np.zeros(dof),
-        "lim_err": msg.lim_err,
-        "lim_vel": np.array(msg.lim_vel, dtype=np.float64) if len(msg.lim_vel) == dof else np.zeros(dof),
-        "lim_acc": np.array(msg.lim_acc, dtype=np.float64) if len(msg.lim_acc) == dof else np.zeros(dof),
-    }
-
-
-def _ros_grip_ctrl_to_driver_cmd(msg, dof=1):
-    return {
-        "ts_ns": int(msg.stamp.sec * 1e9 + msg.stamp.nanosec),
-        "ctrl_mode": msg.ctrl_mode,
-        "jnt_pos": np.array(msg.jnt_pos, dtype=np.float64) if len(msg.jnt_pos) == dof else np.zeros(dof),
-        "jnt_vel": np.array(msg.jnt_vel, dtype=np.float64) if len(msg.jnt_vel) == dof else np.zeros(dof),
-        "jnt_eff": np.array(msg.jnt_eff, dtype=np.float64) if len(msg.jnt_eff) == dof else np.zeros(dof),
-        "grip_force": msg.grip_force,
-        "mit_tau": np.array(msg.mit_tau, dtype=np.float64) if len(msg.mit_tau) == dof else np.zeros(dof),
-        "mit_kp": np.array(msg.mit_kp, dtype=np.float64) if len(msg.mit_kp) == dof else np.zeros(dof),
-        "mit_kd": np.array(msg.mit_kd, dtype=np.float64) if len(msg.mit_kd) == dof else np.zeros(dof),
-        "lim_err": msg.lim_err,
-    }
-
-
 def main():
     interface = DataInterface("mujoco_archer_y6", rate_hz=1.0)
 
+    # ============ parameter ============
+    # state_rate: state publish rate(Hz) → HexMujocoArcherY6Params → driver state loop
     interface.set_parameter("state_rate", 500.0)
+    # cam_rate: camera capture rate(Hz) → driver camera loop
     interface.set_parameter("cam_rate", 30.0)
+    # headless: run Mujoco without GUI → driver render config
     interface.set_parameter("headless", False)
+    # state_buffer_size: state buffer size → driver state cache
     interface.set_parameter("state_buffer_size", 200)
+    # cam_buffer_size: camera buffer size → driver frame cache
     interface.set_parameter("cam_buffer_size", 8)
+    # sens_ts: clock source(true=device clock/false=system clock) → driver timestamp
     interface.set_parameter("sens_ts", False)
+    # camera_type: simulation camera type → driver camera config
     interface.set_parameter("camera_type", "usb")
 
     params = HexMujocoArcherY6Params(
@@ -64,13 +40,13 @@ def main():
         camera_type=interface.get_parameter("camera_type"),
     )
 
+    # ============ publisher ============
     arm_state_pub = interface.create_publisher("arm_state", ArmState, 10)
     grip_state_pub = interface.create_publisher("grip_state", GripState, 10)
     pose_pub = interface.create_publisher("obj_pose", PoseStamped, 10)
     color_pub = interface.create_publisher("color", Image, 10)
     depth_pub = interface.create_publisher("depth", Image, 10)
 
-    sim = None
 
     def arm_state_cb(state):
         try:
@@ -142,6 +118,9 @@ def main():
         except Exception:
             traceback.print_exc()
 
+    # ============ driver ============
+    sim = None
+    
     try:
         sim = HexMujocoArcherY6Callback(params, callbacks={
             "arm_state": arm_state_cb,
@@ -153,7 +132,7 @@ def main():
 
         def node_arm_ctrl_cb(msg):
             try:
-                cmd = _ros_ctrl_to_driver_cmd(msg, dof=6)
+                cmd = ros_ctrl_to_driver_cmd(msg, dof=6)
                 mode = msg.ctrl_mode
                 if mode == ArmCtrlMode.MIT:
                     sim.set_arm_mit_cmd(cmd)
@@ -172,7 +151,7 @@ def main():
 
         def node_grip_ctrl_cb(msg):
             try:
-                cmd = _ros_grip_ctrl_to_driver_cmd(msg, dof=1)
+                cmd = ros_grip_ctrl_to_driver_cmd(msg, dof=1)
                 mode = msg.ctrl_mode
                 if mode == GripCtrlMode.MIT:
                     sim.set_grip_mit_cmd(cmd)
