@@ -26,7 +26,12 @@ def generate_launch_description():
         name='cam_realsense_test',
         output='screen',
         emulate_tty=True,
-        parameters=[{'rate_hz': 30.0}],
+        parameters=[{
+        'rate_hz': 30.0,
+        'cam_buffer_size': 8,
+        'sens_ts': False,
+        'color_encoding': 'bgr8',
+    }],
         remappings=[
             ('color', 'cam_realsense/color'),
             ('depth', 'cam_realsense/depth'),

@@ -26,7 +26,12 @@ def generate_launch_description():
         name='cam_berxel_test',
         output='screen',
         emulate_tty=True,
-        parameters=[{'rate_hz': 30.0}],
+        parameters=[{
+        'rate_hz': 30.0,
+        'cam_buffer_size': 8,
+        'sens_ts': False,
+        'color_encoding': 'bgr8',
+    }],
         remappings=[
             ('color', 'cam_berxel/color'),
             ('depth', 'cam_berxel/depth'),
