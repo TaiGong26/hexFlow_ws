@@ -13,6 +13,12 @@ def generate_launch_description():
             'host': '192.168.1.100',
             'port': 8439,
         }],
+        remappings=[
+            ('arm_state', 'robot_firefly_y6/arm_state'),
+            ('grip_state', 'robot_firefly_y6/grip_state'),
+            ('arm_ctrl', 'robot_firefly_y6/arm_ctrl'),
+            ('grip_ctrl', 'robot_firefly_y6/grip_ctrl'),
+        ],
     )
 
     test_node = Node(

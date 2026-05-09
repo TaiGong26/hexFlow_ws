@@ -13,6 +13,11 @@ def generate_launch_description():
             'host': '192.168.1.100',
             'port': 8439,
         }],
+        remappings=[
+            ('arm_state', 'robot_hello_y6/arm_state'),
+            ('grip_joy', 'robot_hello_y6/grip_joy'),
+            ('grip_led_ctrl', 'robot_hello_y6/grip_led_ctrl'),
+        ],
     )
 
     test_node = Node(

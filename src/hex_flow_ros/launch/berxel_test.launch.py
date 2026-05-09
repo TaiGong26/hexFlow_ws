@@ -14,6 +14,10 @@ def generate_launch_description():
             'height': 400,
             'width': 640,
         }],
+        remappings=[
+            ('color', 'cam_berxel/color'),
+            ('depth', 'cam_berxel/depth'),
+        ],
     )
 
     test_node = Node(

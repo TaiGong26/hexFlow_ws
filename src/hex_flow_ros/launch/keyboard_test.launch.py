@@ -10,6 +10,7 @@ def generate_launch_description():
         name='teleop_keyboard',
         output='screen',
         emulate_tty=True,
+        remappings=[('keyboard', 'teleop_keyboard/keyboard')],
     )
 
     test_node = Node(

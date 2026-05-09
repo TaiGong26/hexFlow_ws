@@ -14,6 +14,9 @@ def generate_launch_description():
             'height': 480,
             'width': 640,
         }],
+        remappings=[
+            ('color', 'cam_dummy/color'),
+        ],
     )
 
     test_node = Node(

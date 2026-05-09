@@ -10,6 +10,7 @@ def generate_launch_description():
         name='teleop_joystick',
         output='screen',
         emulate_tty=True,
+        remappings=[('joy', 'teleop_joystick/joy')],
     )
 
     test_node = Node(

@@ -15,6 +15,16 @@ def generate_launch_description():
             'headless': False,
             'camera_type': 'usb',
         }],
+        remappings=[
+            ('arm_state', 'mujoco_archer_y6/arm_state'),
+            ('grip_state', 'mujoco_archer_y6/grip_state'),
+            ('obj_pose', 'mujoco_archer_y6/obj_pose'),
+            ('color', 'mujoco_archer_y6/color'),
+            ('depth', 'mujoco_archer_y6/depth'),
+            ('arm_ctrl', 'mujoco_archer_y6/arm_ctrl'),
+            ('grip_ctrl', 'mujoco_archer_y6/grip_ctrl'),
+            ('reset', 'mujoco_archer_y6/reset'),
+        ],
     )
 
     test_node = Node(
