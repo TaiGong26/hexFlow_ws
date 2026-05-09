@@ -104,10 +104,10 @@ class HexFlowTemplateArcherY6:
         return ctrl
 
     def __teleop_process(self):
-        rate = self.__interface.create_rate(100.0)
+        self.__interface.set_rate(100.0)
         prev_q = 0
         while self.__interface.ok() and not self.__stop_event.is_set():
-            rate.sleep()
+            self.__interface.sleep()
             msg = self.__interface.get("keys", latest=True)
             if msg is not None:
                 curr_q = msg.buttons[16]  # buttons[16] = 'q'
@@ -116,9 +116,9 @@ class HexFlowTemplateArcherY6:
                 prev_q = curr_q
 
     def __init_process(self):
-        rate = self.__interface.create_rate(self.__rate_hz)
+        self.__interface.set_rate(self.__rate_hz)
         while self.__interface.ok() and not self.__stop_event.is_set():
-            rate.sleep()
+            self.__interface.sleep()
 
             state_msg = self.__interface.get("arm_state", latest=True)
             grip_msg = self.__interface.get("grip_state", latest=True)
@@ -147,9 +147,9 @@ class HexFlowTemplateArcherY6:
             self.__interface.publish(self.__grip_ctrl_pub, grip_ctrl)
 
     def __work_process(self):
-        rate = self.__interface.create_rate(self.__rate_hz)
+        self.__interface.set_rate(self.__rate_hz)
         while self.__interface.ok() and not self.__stop_event.is_set():
-            rate.sleep()
+            self.__interface.sleep()
 
             ctrl = self.__build_comp_ctrl()
             self.__interface.publish(self.__arm_ctrl_pub, ctrl)
