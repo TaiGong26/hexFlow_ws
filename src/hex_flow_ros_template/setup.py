@@ -3,7 +3,7 @@ from glob import glob
 
 from setuptools import setup, find_packages
 
-package_name = 'hex_flow_template_ros'
+package_name = 'hex_flow_ros_template'
 
 setup(
     name=package_name,
@@ -25,8 +25,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'hex-template-archer-y6 = hex_flow_template_ros.main:main_archer_y6',
-            'hex-template-e3-desktop = hex_flow_template_ros.main:main_e3_desktop',
+            'hex-template-archer-y6 = hex_flow_ros_template.main:main_archer_y6',
+            'hex-template-e3-desktop = hex_flow_ros_template.main:main_e3_desktop',
         ],
     },
 )

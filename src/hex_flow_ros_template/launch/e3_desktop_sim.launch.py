@@ -8,7 +8,7 @@ def generate_launch_description():
     sim_group = GroupAction([
         PushRosNamespace('sim'),
         Node(
-            package='hex_flow_ros',
+            package='hex_flow_ros_mujoco',
             executable='hex-mujoco-e3-desktop',
             name='mujoco_e3_desktop',
             output='screen',
@@ -21,7 +21,7 @@ def generate_launch_description():
     ])
 
     template_node = Node(
-        package='hex_flow_template_ros',
+        package='hex_flow_ros_template',
         executable='hex-template-e3-desktop',
         name='template_e3_desktop',
         output='screen',
@@ -42,7 +42,7 @@ def generate_launch_description():
     teleop_group = GroupAction([
         PushRosNamespace('teleop'),
         Node(
-            package='hex_flow_ros',
+            package='hex_flow_ros_teleop',
             executable='hex-teleop-keyboard',
             name='teleop_keyboard',
             output='screen',

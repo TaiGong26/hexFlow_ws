@@ -1,5 +1,5 @@
-from hex_flow_template_ros.template_archer_y6 import HexFlowTemplateArcherY6
-from hex_flow_template_ros.template_e3_desktop import HexFlowTemplateE3Desktop
+from hex_flow_ros_template.template_archer_y6 import HexFlowTemplateArcherY6
+from hex_flow_ros_template.template_e3_desktop import HexFlowTemplateE3Desktop
 
 
 def main_archer_y6():

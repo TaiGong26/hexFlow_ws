@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>hex_flow_template_ros</name>
+  <name>hex_flow_ros_template</name>
   <version>0.0.1</version>
   <description>HexFlow ROS2 application template package (Archer Y6 + E3 Desktop)</description>
   <maintainer email="847235539@qq.com">Dong Zhaorui</maintainer>

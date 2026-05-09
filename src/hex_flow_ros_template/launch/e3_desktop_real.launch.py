@@ -13,7 +13,7 @@ def generate_launch_description():
     )
 
     left_robot = Node(
-        package='hex_flow_ros',
+        package='hex_flow_ros_robot',
         executable='hex-robot-archer-y6',
         name='robot_left_arm',
         namespace='robot/left',
@@ -26,7 +26,7 @@ def generate_launch_description():
     )
 
     right_robot = Node(
-        package='hex_flow_ros',
+        package='hex_flow_ros_robot',
         executable='hex-robot-archer-y6',
         name='robot_right_arm',
         namespace='robot/right',
@@ -41,7 +41,7 @@ def generate_launch_description():
     teleop_group = GroupAction([
         PushRosNamespace('teleop'),
         Node(
-            package='hex_flow_ros',
+            package='hex_flow_ros_teleop',
             executable='hex-teleop-keyboard',
             name='teleop_keyboard',
             output='screen',
@@ -50,7 +50,7 @@ def generate_launch_description():
     ])
 
     template_node = Node(
-        package='hex_flow_template_ros',
+        package='hex_flow_ros_template',
         executable='hex-template-e3-desktop',
         name='template_e3_desktop',
         output='screen',
