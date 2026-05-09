@@ -66,12 +66,12 @@ def main():
     # ============ publisher ============
     led_pub = interface.create_publisher("grip_led_ctrl", Int32MultiArray, 10)
 
-    rate = interface.set_rate(rate_hz)
+    interface.set_rate(rate_hz)
     fps_cnt, fps_start = 0, time.perf_counter_ns()
     fps_info = ""
     try:
         while interface.ok():
-            rate.sleep()
+            interface.sleep()
 
             fps_cnt += 1
             if fps_cnt >= 1000:

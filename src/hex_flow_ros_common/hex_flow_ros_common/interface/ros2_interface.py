@@ -58,7 +58,6 @@ class DataInterface(InterfaceBase):
     def set_rate(self, hz):
         self._rate_hz = hz
         self._rate = self.__node.create_rate(self._rate_hz)
-        return self._rate
 
     def get_rate(self):
         return self._rate_hz

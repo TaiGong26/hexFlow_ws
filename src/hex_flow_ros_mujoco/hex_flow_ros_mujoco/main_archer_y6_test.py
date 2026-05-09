@@ -50,12 +50,12 @@ def main():
 
     ctrl_mode = _ARM_CTRL_MODES.get(ctrl_mode_name, ArmCtrlMode.POS)
 
-    rate = interface.set_rate(rate_hz)
+    interface.set_rate(rate_hz)
     fps_cnt, fps_start = 0, time.perf_counter_ns()
     fps_info = ""
     try:
         while interface.ok():
-            rate.sleep()
+            interface.sleep()
 
             fps_cnt += 1
             if fps_cnt >= 100:
