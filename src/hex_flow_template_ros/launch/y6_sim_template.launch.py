@@ -1,19 +1,9 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node, PushRosNamespace
 from launch.actions import GroupAction
-from launch.conditions import IfCondition
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
 
 
 def generate_launch_description():
-
-    robot_type = DeclareLaunchArgument(
-        'robot_type',
-        default_value='archer_y6',
-        description='Robot type: archer_y6 or e3_desktop.',
-    )
-
     sim_group = GroupAction([
         PushRosNamespace('sim'),
         Node(
@@ -27,8 +17,17 @@ def generate_launch_description():
                 'state_rate': 500.0,
                 'camera_type': 'usb',
             }],
-            condition=IfCondition(  
-                LaunchConfiguration('robot_type')),
+        ),
+    ])
+
+    teleop_group = GroupAction([
+        PushRosNamespace('teleop'),
+        Node(
+            package='hex_flow_ros',
+            executable='hex-teleop-keyboard',
+            name='teleop_keyboard',
+            output='screen',
+            emulate_tty=True,
         ),
     ])
 
@@ -52,7 +51,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        robot_type,
         sim_group,
+        teleop_group,
         template_node,
     ])
