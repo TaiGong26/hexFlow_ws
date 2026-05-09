@@ -7,8 +7,12 @@
   <license>Apache-2.0</license>
 
   <exec_depend>rclpy</exec_depend>
-  <exec_depend>hex_flow_ros</exec_depend>
   <exec_depend>hex_flow_ros_msg</exec_depend>
+  <exec_depend>hex_flow_ros_common</exec_depend>
+  <exec_depend>hex_flow_ros_camera</exec_depend>
+  <exec_depend>hex_flow_ros_robot</exec_depend>
+  <exec_depend>hex_flow_ros_mujoco</exec_depend>
+  <exec_depend>hex_flow_ros_teleop</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
 
   <export>
