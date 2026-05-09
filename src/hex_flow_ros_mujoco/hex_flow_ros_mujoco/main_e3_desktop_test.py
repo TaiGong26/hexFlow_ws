@@ -48,7 +48,7 @@ def main():
 
     ctrl_mode = ArmCtrlMode.POS
 
-    rate = interface.create_rate(rate_hz)
+    rate = interface.set_rate(rate_hz)
     fps_cnt, fps_start = 0, time.perf_counter_ns()
     fps_info = ""
     try:
