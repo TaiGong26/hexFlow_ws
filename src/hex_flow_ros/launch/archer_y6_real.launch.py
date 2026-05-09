@@ -25,6 +25,24 @@ def generate_launch_description():
         description='Control loop rate (Hz).',
     )
 
+    state_buffer_size = DeclareLaunchArgument(
+        'state_buffer_size',
+        default_value='200',
+        description='State buffer size.',
+    )
+
+    sens_ts = DeclareLaunchArgument(
+        'sens_ts',
+        default_value='false',
+        description='Use device clock for timestamps.',
+    )
+
+    grip_type = DeclareLaunchArgument(
+        'grip_type',
+        default_value='gp80',
+        description='Gripper type.',
+    )
+
     enable_keyboard = DeclareLaunchArgument(
         'enable_keyboard',
         default_value='false',
@@ -49,13 +67,10 @@ def generate_launch_description():
                 'host': LaunchConfiguration('host'),
                 'port': LaunchConfiguration('port'),
                 'ctrl_rate': LaunchConfiguration('ctrl_rate'),
+                'state_buffer_size': LaunchConfiguration('state_buffer_size'),
+                'sens_ts': LaunchConfiguration('sens_ts'),
+                'grip_type': LaunchConfiguration('grip_type'),
             }],
-            remappings=[
-                ('arm_state', 'arm_state'),
-                ('grip_state', 'grip_state'),
-                ('arm_ctrl', 'arm_ctrl'),
-                ('grip_ctrl', 'grip_ctrl'),
-            ],
         ),
     ])
 
@@ -83,6 +98,9 @@ def generate_launch_description():
         host,
         port,
         ctrl_rate,
+        state_buffer_size,
+        sens_ts,
+        grip_type,
         enable_keyboard,
         enable_joystick,
         robot_group,

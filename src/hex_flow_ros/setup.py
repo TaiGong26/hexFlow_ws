@@ -40,6 +40,21 @@ setup(
             # Mujoco nodes
             'hex-mujoco-archer-y6 = hex_flow_ros.node.node_mujoco_archer_y6:main',
             'hex-mujoco-e3-desktop = hex_flow_ros.node.node_mujoco_e3_desktop:main',
+            # Camera test nodes
+            'hex-cam-usb-test = hex_flow_ros.node.node_cam_usb_test:main',
+            'hex-cam-berxel-test = hex_flow_ros.node.node_cam_berxel_test:main',
+            'hex-cam-realsense-test = hex_flow_ros.node.node_cam_realsense_test:main',
+            'hex-cam-dummy-test = hex_flow_ros.node.node_cam_dummy_test:main',
+            # Teleop test nodes
+            'hex-teleop-keyboard-test = hex_flow_ros.node.node_teleop_keyboard_test:main',
+            'hex-teleop-joystick-test = hex_flow_ros.node.node_teleop_joystick_test:main',
+            # Robot test nodes
+            'hex-robot-archer-y6-test = hex_flow_ros.node.node_robot_archer_y6_test:main',
+            'hex-robot-firefly-y6-test = hex_flow_ros.node.node_robot_firefly_y6_test:main',
+            'hex-robot-hello-y6-test = hex_flow_ros.node.node_robot_hello_y6_test:main',
+            # Mujoco test nodes
+            'hex-mujoco-archer-y6-test = hex_flow_ros.node.node_mujoco_archer_y6_test:main',
+            'hex-mujoco-e3-desktop-test = hex_flow_ros.node.node_mujoco_e3_desktop_test:main',
         ],
     },
 )

@@ -19,6 +19,24 @@ def generate_launch_description():
         description='State publish rate (Hz).',
     )
 
+    state_buffer_size = DeclareLaunchArgument(
+        'state_buffer_size',
+        default_value='200',
+        description='State buffer size.',
+    )
+
+    cam_buffer_size = DeclareLaunchArgument(
+        'cam_buffer_size',
+        default_value='8',
+        description='Camera buffer size.',
+    )
+
+    sens_ts = DeclareLaunchArgument(
+        'sens_ts',
+        default_value='false',
+        description='Use device clock for timestamps.',
+    )
+
     enable_keyboard = DeclareLaunchArgument(
         'enable_keyboard',
         default_value='false',
@@ -42,6 +60,9 @@ def generate_launch_description():
             parameters=[{
                 'headless': LaunchConfiguration('headless'),
                 'state_rate': LaunchConfiguration('state_rate'),
+                'state_buffer_size': LaunchConfiguration('state_buffer_size'),
+                'cam_buffer_size': LaunchConfiguration('cam_buffer_size'),
+                'sens_ts': LaunchConfiguration('sens_ts'),
                 'cam_rate': 30.0,
                 'camera_type': 'usb',
             }],
@@ -71,6 +92,9 @@ def generate_launch_description():
     return LaunchDescription([
         headless,
         state_rate,
+        state_buffer_size,
+        cam_buffer_size,
+        sens_ts,
         enable_keyboard,
         enable_joystick,
         sim_group,
