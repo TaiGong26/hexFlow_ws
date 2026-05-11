@@ -3,6 +3,13 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
+    
+    host = DeclareLaunchArgument(
+        'host',
+        default_value='0.0.0.0',
+        description='Robot controller IP address.',
+    )
+    
     robot_node = Node(
         package='hex_flow_ros_robot',
         executable='hex-robot-firefly-y6',
@@ -10,7 +17,7 @@ def generate_launch_description():
         output='screen',
         emulate_tty=True,
         parameters=[{
-            'host': '192.168.1.100',
+            'host': LaunchConfiguration('host'),
             'port': 8439,
         }],
         remappings=[
@@ -35,4 +42,9 @@ def generate_launch_description():
         ],
     )
 
-    return LaunchDescription([robot_node, test_node])
+
+    return LaunchDescription([
+        host,
+        robot_node, 
+        test_node
+        ])
