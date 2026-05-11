@@ -10,7 +10,7 @@ def generate_launch_description():
         output='screen',
         emulate_tty=True,
         parameters=[{
-            'host': '192.168.1.100',
+            'host': '172.18.23.197',
             'port': 8439,
         }],
         remappings=[

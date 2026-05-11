@@ -32,10 +32,10 @@ def _show_state(arm_state, grip_state, fps_info=""):
 
 
 def main():
-    interface = DataInterface("robot_archer_y6_test", rate_hz=100.0)
+    interface = DataInterface("robot_archer_y6_test", rate_hz=500.0)
 
     # ============ parameter ============
-    interface.set_parameter("rate_hz", 100.0)
+    interface.set_parameter("rate_hz", 500.0)
     interface.set_parameter("arm_ctrl_mode", "pos")
 
     ctrl_mode_name = interface.get_parameter("arm_ctrl_mode")
@@ -79,6 +79,7 @@ def main():
             ctrl.stamp = interface.get_timestamp()
             ctrl.ctrl_mode = ctrl_mode
             ctrl.jnt_pos = [0.0, -1.5, 3.0, 0.07, 0.0, 0.0]
+            # ctrl.jnt_pos = [0.0, -0.0, 0.0, 0.07, 0.0, 0.0] 
             ctrl.mit_kp = [50.0] * 6
             ctrl.mit_kd = [2.0] * 6
             ctrl.lim_err = 0.02
@@ -86,7 +87,7 @@ def main():
 
             current_arm = arm_state
             current_grip = grip_state
-            _show_state(current_arm, current_grip, fps_info)
+            # _show_state(current_arm, current_grip, fps_info)
 
     except KeyboardInterrupt:
         pass

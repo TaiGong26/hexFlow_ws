@@ -12,7 +12,7 @@ class HexFlowTemplateArcherY6:
 
     def __init__(self, name="template_archer_y6"):
         self.__name = name
-        self.__interface = DataInterface(name, rate_hz=1.0)
+        self.__interface = DataInterface(name, rate_hz=500.0)
         self.__stop_event = threading.Event()
 
         self.__init_params()
