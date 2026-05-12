@@ -31,19 +31,36 @@ _AXIS_MAP = {
     ecodes.ABS_HAT0Y: 7,
 }
 
+def _has_joystick_buttons(caps):
+    """Check if the device has joystick/gamepad buttons (0x120-0x13f)."""
+    key_codes = caps.get(ecodes.EV_KEY, [])
+    return any(0x120 <= code <= 0x13f for code in key_codes)
 
-def find_joystick(device_path=""):
-    if device_path:
-        dev = InputDevice(device_path)
-        print(f"[joystick] using: {dev.path} {dev.name}")
-        return dev
+
+def find_joysticks():
+    """Find joystick / gamepad devices.
+
+    Prefer devices that have both ABS axes and joystick/gamepad buttons.
+    Fall back to any ABS_X/ABS_Y device only if no real gamepad is found.
+    """
+    gamepads = []
+    fallback = []
     for path in list_devices():
         dev = InputDevice(path)
         caps = dev.capabilities(absinfo=False)
-        if ecodes.EV_ABS in caps and ecodes.ABS_X in caps[ecodes.EV_ABS]:
-            print(f"[joystick] found: {dev.path} {dev.name}")
-            return dev
-    return None
+        if ecodes.EV_ABS not in caps:
+            continue
+        abs_codes = caps[ecodes.EV_ABS]
+        if ecodes.ABS_X not in abs_codes and ecodes.ABS_Y not in abs_codes:
+            continue
+        if _has_joystick_buttons(caps):
+            print(f"[joystick] found gamepad: {dev.path} {dev.name}")
+            gamepads.append(dev)
+        else:
+            print(f"[joystick] found candidate: {dev.path} {dev.name}")
+            fallback.append(dev)
+    
+    return gamepads if gamepads else fallback
 
 
 class JoystickStateReader:
@@ -54,6 +71,7 @@ class JoystickStateReader:
         self._axes = [0.0] * len(_AXIS_MAP)
         self._lock = threading.Lock()
         self._running = False
+        self._set_view_test = False
 
     def start(self):
         self._running = True
@@ -64,7 +82,6 @@ class JoystickStateReader:
         self._running = False
 
     def _read_loop(self):
-        non_prop = {ecodes.EV_KEY, ecodes.EV_ABS, ecodes.EV_SYN}
         while self._running:
             r, _, _ = select.select([self._device.fd], [], [], 0.01)
             if not r:
@@ -74,6 +91,7 @@ class JoystickStateReader:
                     if event.type == ecodes.EV_KEY and event.code in _BTN_MAP:
                         with self._lock:
                             self._btns[_BTN_MAP[event.code]] = event.value
+
                     elif event.type == ecodes.EV_ABS and event.code in _AXIS_MAP:
                         with self._lock:
                             val = event.value
@@ -83,6 +101,14 @@ class JoystickStateReader:
                                     2.0 * (val - absinfo.min)
                                     / (absinfo.max - absinfo.min) - 1.0
                                 )
+                    if self._set_view_test:
+                        if event.type == ecodes.EV_KEY and event.value == 1:
+                            name = ecodes.bytype[ecodes.EV_KEY].get(event.code, "UNKNOWN")
+                            print(f"[KEY PRESS] code={event.code}, name={name}, value={event.value}")
+                            
+                        if event.type == ecodes.EV_ABS:
+                            name = ecodes.bytype[ecodes.EV_ABS].get(event.code, "UNKNOWN")
+                            print(f"[AXIS MOVE] code={event.code}, name={name}, value={event.value}")
             except OSError:
                 break
 
@@ -93,24 +119,34 @@ class JoystickStateReader:
     def get_axes(self):
         with self._lock:
             return list(self._axes)
+        
+    def set_view(self, enable=True):
+            self._set_view_test = enable
 
 
 def main():
     interface = DataInterface("teleop_joystick", rate_hz=100.0)
     interface.set_parameter("device_path", "")
+    interface.set_parameter("xbox_view_test", False)
 
     device_path = interface.get_parameter("device_path")
-    device = find_joystick(device_path)
-    if device is None:
+    if device_path:
+        devices = [InputDevice(device_path)]
+        print(f"[joystick] using: {devices[0].path} {devices[0].name}")
+    else:
+        devices = find_joysticks()
+        
+    if not devices:
         print("[joystick] no joystick device found")
         interface.shutdown()
         return
 
     joy_pub = interface.create_publisher("joy", Joy, 10)
 
+    device = devices[0]
     reader = JoystickStateReader(device)
     reader.start()
-
+    reader.set_view(interface.get_parameter("xbox_view_test"))
     try:
         while interface.ok():
             interface.sleep()

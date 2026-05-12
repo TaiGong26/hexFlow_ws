@@ -72,7 +72,8 @@ class DataInterface(InterfaceBase):
 
     def shutdown(self):
         self.__node.destroy_node()
-        rclpy.shutdown()
+        if self.ok():
+            rclpy.shutdown()    
 
     # ---- Logging ----
 

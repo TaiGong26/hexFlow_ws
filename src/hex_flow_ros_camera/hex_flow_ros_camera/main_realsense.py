@@ -24,7 +24,7 @@ def main():
     # color_encoding: color image encoding format → driver encoding config
     interface.set_parameter("color_encoding", "bgr8")
     # depth_encoding: depth image encoding format → driver encoding config
-    interface.set_parameter("depth_encoding", "16UC1")
+    interface.set_parameter("depth_encoding", "mono16")
 
     params = HexCamRealsenseParams(
         frame_rate=interface.get_parameter("frame_rate"),

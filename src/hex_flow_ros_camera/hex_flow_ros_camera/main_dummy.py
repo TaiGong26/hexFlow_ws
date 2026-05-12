@@ -1,6 +1,6 @@
 import traceback
 
-from hex_driver_camera import HexCamDummyCallback
+from hex_driver_camera import HexCamDummyCallback, HexCamDummyParams
 from hex_flow_ros_common.interface import DataInterface
 from sensor_msgs.msg import Image
 
@@ -22,13 +22,14 @@ def main():
     # color_encoding: color image encoding format → driver encoding config
     interface.set_parameter("color_encoding", "bgr8")
 
-    params = {
-        "frame_rate": interface.get_parameter("frame_rate"),
-        "height": interface.get_parameter("height"),
-        "width": interface.get_parameter("width"),
-        "cam_buffer_size": interface.get_parameter("cam_buffer_size"),
-        "sens_ts": interface.get_parameter("sens_ts"),
-    }
+    params = HexCamDummyParams(
+        frame_rate=interface.get_parameter("frame_rate"),
+        height=interface.get_parameter("height"),
+        width=interface.get_parameter("width"),
+        cam_buffer_size=interface.get_parameter("cam_buffer_size"),
+        sens_ts=interface.get_parameter("sens_ts"),
+    )
+    
     color_encoding = interface.get_parameter("color_encoding")
 
     # ============ publisher ============
