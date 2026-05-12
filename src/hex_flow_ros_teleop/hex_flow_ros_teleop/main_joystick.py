@@ -9,10 +9,10 @@ from sensor_msgs.msg import Joy
 
 # 标准名称 -> Joy 消息数组索引的映射
 _BTN_NAME_TO_INDEX = {
-    'BTN_A': 0,
-    'BTN_B': 1,
-    'BTN_X': 2,
-    'BTN_Y': 3,
+    'BTN_X': 0,
+    'BTN_Y': 1,
+    'BTN_A': 2,
+    'BTN_B': 3,
     'BTN_TL': 4,
     'BTN_TR': 5,
     'BTN_TL2': 6,
@@ -200,3 +200,4 @@ def main():
     finally:
         reader.stop()
         interface.shutdown()
+
