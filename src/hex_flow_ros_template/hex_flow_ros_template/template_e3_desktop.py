@@ -99,35 +99,58 @@ class HexFlowTemplateE3Desktop:
         ctrl.mit_kd = kd.tolist()
         ctrl.lim_err = lim_err
         return ctrl
+    
+    def __build_grip_comp_ctrl(self):
+        ctrl = GripCtrl()
+        ctrl.stamp = self.__interface.get_timestamp()
+        ctrl.ctrl_mode = GripCtrlMode.COMP
+        ctrl.mit_tau = np.zeros(1).tolist()
+        ctrl.mit_kp = np.zeros(1).tolist()
+        ctrl.mit_kd = np.zeros(1).tolist()
+        return ctrl
+
+    def __is_running(self):
+        return self.__interface.ok() and not self.__stop_event.is_set()
 
     def __teleop_process(self):
         self.__interface.set_rate(100.0)
         prev_q = 0
-        while self.__interface.ok() and not self.__stop_event.is_set():
+        while self.__is_running():
             self.__interface.sleep()
             msg = self.__interface.get("keys", latest=True)
             if msg is not None:
                 curr_q = msg.buttons[16]
                 if curr_q and not prev_q:
                     self.__stop_event.set()
+                    self.__interface.logi("Exit signal in, arm homing.")
                 prev_q = curr_q
 
     def __init_process(self):
         self.__interface.set_rate(self.__rate_hz)
         arrived = {side: False for side in self.__sides}
-        while self.__interface.ok() and not self.__stop_event.is_set():
+        while self.__is_running():
             self.__interface.sleep()
 
             for side in self.__sides:
                 if arrived[side]:
                     continue
-                state_msg = self.__interface.get(
+                arm_msg = self.__interface.get(
                     f"{side}_arm_state", latest=True)
-                if state_msg is None:
+                grip_msg = self.__interface.get(
+                    f"{side}_grip_state", latest=True)
+                if arm_msg is None:
                     continue
-                jnt_pos = np.array(state_msg.jnt_pos, dtype=np.float64)
-                err = np.fabs(self.__arm_stable_pos - jnt_pos).max()
-                if err < self.__arrive_threshold:
+
+                jnt_pos = np.array(arm_msg.jnt_pos, dtype=np.float64)
+                arm_err = np.fabs(self.__arm_stable_pos - jnt_pos).max()
+
+                grip_err = 0.0
+                if grip_msg is not None:
+                    grip_pos = np.array(grip_msg.jnt_pos, dtype=np.float64)
+                    grip_err = np.fabs(
+                        self.__grip_stable_pos - grip_pos).max()
+
+                if arm_err < self.__arrive_threshold and grip_err < self.__arrive_threshold:
                     arrived[side] = True
                 else:
                     ctrl = self.__build_pos_ctrl(
@@ -136,20 +159,70 @@ class HexFlowTemplateE3Desktop:
                     self.__interface.publish(
                         self.__arm_ctrl_pubs[side], ctrl)
 
+                    grip_ctrl = self.__build_grip_pos_ctrl(
+                        self.__grip_stable_pos, self.__grip_kp,
+                        self.__grip_kd, self.__grip_err_threshold)
+                    self.__interface.publish(
+                        self.__grip_ctrl_pubs[side], grip_ctrl)
+
             if all(arrived.values()):
                 return
 
     def __work_process(self):
         self.__interface.set_rate(self.__rate_hz)
-        while self.__interface.ok() and not self.__stop_event.is_set():
+        while self.__is_running():
             self.__interface.sleep()
             for side in self.__sides:
                 ctrl = self.__build_comp_ctrl()
                 self.__interface.publish(
                     self.__arm_ctrl_pubs[side], ctrl)
 
+                grip_ctrl = self.__build_grip_comp_ctrl()
+                self.__interface.publish(
+                    self.__grip_ctrl_pubs[side], grip_ctrl)
+
     def __exit_process(self):
-        self.__init_process()
+        self.__interface.set_rate(self.__rate_hz)
+        arrived = {side: False for side in self.__sides}
+        while self.__interface.ok():
+            self.__interface.sleep()
+
+            for side in self.__sides:
+                if arrived[side]:
+                    continue
+                arm_msg = self.__interface.get(
+                    f"{side}_arm_state", latest=True)
+                grip_msg = self.__interface.get(
+                    f"{side}_grip_state", latest=True)
+                if arm_msg is None:
+                    continue
+
+                jnt_pos = np.array(arm_msg.jnt_pos, dtype=np.float64)
+                arm_err = np.fabs(self.__arm_stable_pos - jnt_pos).max()
+
+                grip_err = 0.0
+                if grip_msg is not None:
+                    grip_pos = np.array(grip_msg.jnt_pos, dtype=np.float64)
+                    grip_err = np.fabs(
+                        self.__grip_stable_pos - grip_pos).max()
+
+                if arm_err < self.__arrive_threshold:
+                    arrived[side] = True
+                else:
+                    ctrl = self.__build_pos_ctrl(
+                        self.__arm_stable_pos, self.__arm_kp,
+                        self.__arm_kd, self.__arm_err_threshold)
+                    self.__interface.publish(
+                        self.__arm_ctrl_pubs[side], ctrl)
+
+                    grip_ctrl = self.__build_grip_pos_ctrl(
+                        self.__grip_stable_pos, self.__grip_kp,
+                        self.__grip_kd, self.__grip_err_threshold)
+                    self.__interface.publish(
+                        self.__grip_ctrl_pubs[side], grip_ctrl)
+
+            if all(arrived.values()):
+                return
 
     def start(self):
         self.__stop_event.clear()
@@ -166,3 +239,4 @@ class HexFlowTemplateE3Desktop:
             self.__teleop_thread.join(timeout=2.0)
         self.__exit_process()
         self.__interface.shutdown()
+        self.__interface.logi("Arm homed, ready to exit.")
