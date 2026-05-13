@@ -55,8 +55,8 @@ def main():
             msg.pose_pos = state["pose_pos"].tolist()
             msg.pose_quat = state["pose_quat"].tolist()
             interface.publish(arm_state_pub, msg)
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
+            interface.loge(f"publish arm state failed: {e}")
 
     def grip_state_cb(state):
         try:
@@ -66,8 +66,8 @@ def main():
             msg.jnt_vel = state["jnt_vel"].tolist()
             msg.jnt_eff = state["jnt_eff"].tolist()
             interface.publish(grip_state_pub, msg)
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
+            interface.loge(f"publish grip state failed: {e}")
 
     # ============ driver ============
     try:
@@ -92,8 +92,8 @@ def main():
                     robot.set_arm_pos_plan_cmd(cmd)
                 elif mode == ArmCtrlMode.POSE_PLAN:
                     robot.set_arm_pose_plan_cmd(cmd)
-            except Exception:
-                traceback.print_exc()
+            except Exception as e:
+                interface.loge(f"arm ctrl failed: {e}")
 
         def node_grip_ctrl_cb(msg):
             try:
@@ -107,8 +107,8 @@ def main():
                     robot.set_grip_pos_cmd(cmd)
                 elif mode == GripCtrlMode.FORCE:
                     robot.set_grip_force_cmd(cmd)
-            except Exception:
-                traceback.print_exc()
+            except Exception as e:
+                interface.loge(f"grip ctrl failed: {e}")
 
         interface.create_subscription("arm_ctrl", ArmCtrl, node_arm_ctrl_cb, 10)
         interface.create_subscription("grip_ctrl", GripCtrl, node_grip_ctrl_cb, 10)

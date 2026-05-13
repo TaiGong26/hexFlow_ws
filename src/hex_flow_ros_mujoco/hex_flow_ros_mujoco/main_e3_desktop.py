@@ -16,7 +16,7 @@ def main():
 
     # ============ parameter ============
     # state_rate: state publish rate(Hz) → HexMujocoE3DesktopParams → driver state loop
-    interface.set_parameter("state_rate", 1000.0)
+    interface.set_parameter("state_rate", 500.0)
     # cam_rate: camera capture rate(Hz) → driver camera loop
     interface.set_parameter("cam_rate", 30.0)
     # headless: run Mujoco without GUI → driver render config
@@ -66,17 +66,7 @@ def main():
             f"{cam}_color", Image, 10)
         depth_pubs[cam] = interface.create_publisher(
             f"{cam}_depth", Image, 10)
-
-    # ============ buffered subscription ============
-    for side in ("left", "right"):
-        interface.create_subscription_buffered(
-            f"{side}_arm_ctrl", ArmCtrl, maxlen=1, queue_size=1)
-        interface.create_subscription_buffered(
-            f"{side}_grip_ctrl", GripCtrl, maxlen=1, queue_size=1)
-    interface.create_subscription_buffered(
-        "reset", Bool, maxlen=1, queue_size=1)
-
-    # ============ driver callbacks ============
+        
     def _make_arm_state_cb(side):
         def cb(state):
             try:
@@ -89,8 +79,8 @@ def main():
                 msg.pose_pos = state["pose_pos"].tolist()
                 msg.pose_quat = state["pose_quat"].tolist()
                 interface.publish(arm_state_pubs[side], msg)
-            except Exception:
-                traceback.print_exc()
+            except Exception as e:
+                interface.loge(f"publish arm state failed: {e}")
         return cb
 
     def _make_grip_state_cb(side):
@@ -103,8 +93,8 @@ def main():
                 msg.jnt_vel = state["jnt_vel"].tolist()
                 msg.jnt_eff = state["jnt_eff"].tolist()
                 interface.publish(grip_state_pubs[side], msg)
-            except Exception:
-                traceback.print_exc()
+            except Exception as e:
+                interface.loge(f"publish grip state failed: {e}")
         return cb
 
     def obj_pose_cb(state):
@@ -120,8 +110,8 @@ def main():
             msg.pose.orientation.z = float(state["pose_quat"][2])
             msg.pose.orientation.w = float(state["pose_quat"][3])
             interface.publish(pose_pub, msg)
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
+            interface.loge(f"publish obj pose failed: {e}")
 
     def _make_color_img_cb(cam):
         def cb(state):
@@ -136,8 +126,8 @@ def main():
                 msg.step = msg.width * 3
                 msg.data = state["data"].tobytes()
                 interface.publish(color_pubs[cam], msg)
-            except Exception:
-                traceback.print_exc()
+            except Exception as e:
+                interface.loge(f"publish color image failed: {e}")
         return cb
 
     def _make_depth_img_cb(cam):
@@ -153,10 +143,10 @@ def main():
                 msg.step = msg.width * 2
                 msg.data = state["data"].tobytes()
                 interface.publish(depth_pubs[cam], msg)
-            except Exception:
-                traceback.print_exc()
+            except Exception as e:
+                interface.loge(f"publish depth image failed: {e}")
         return cb
-
+    
     callbacks = {}
     for side in ("left", "right"):
         callbacks[f"{side}_arm_state"] = _make_arm_state_cb(side)
@@ -165,6 +155,16 @@ def main():
     for cam in ("head", "left", "right"):
         callbacks[f"{cam}_color_img"] = _make_color_img_cb(cam)
         callbacks[f"{cam}_depth_img"] = _make_depth_img_cb(cam)
+
+
+    # ============ buffered subscription ============
+    for side in ("left", "right"):
+        interface.create_subscription_buffered(
+            f"{side}_arm_ctrl", ArmCtrl, maxlen=1, queue_size=1)
+        interface.create_subscription_buffered(
+            f"{side}_grip_ctrl", GripCtrl, maxlen=1, queue_size=1)
+    interface.create_subscription_buffered(
+        "reset", Bool, maxlen=1, queue_size=1)
 
     # ============ driver ============
     sim = None

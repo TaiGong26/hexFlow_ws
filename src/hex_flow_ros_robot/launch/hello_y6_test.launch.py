@@ -11,6 +11,11 @@ def generate_launch_description():
         description='Robot controller IP address.',
     )
     
+    port = DeclareLaunchArgument(
+        'port',
+        default_value='8439',
+        description='Robot controller port.',
+    )
     
     robot_node = Node(
         package='hex_flow_ros_robot',
@@ -20,7 +25,7 @@ def generate_launch_description():
         emulate_tty=True,
         parameters=[{
             'host': LaunchConfiguration('host'),
-            'port': 8439,
+            'port': LaunchConfiguration('port'),
         }],
         remappings=[
             ('arm_state', 'robot_hello_y6/arm_state'),
@@ -46,6 +51,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         host,
+        port,
         robot_node, 
         test_node
         ])

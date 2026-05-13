@@ -38,7 +38,7 @@ class DataInterface(InterfaceBase):
         try:
             publisher.publish(msg)
         except Exception:
-            self.loge("publish failed")
+            pass
 
     # ---- Timer ----
 

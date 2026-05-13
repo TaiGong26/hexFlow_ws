@@ -47,12 +47,13 @@ def main():
             msg.jnt_vel = state["jnt_vel"].tolist()
             # jnt_eff intentionally omitted — Zenoh reference does not publish it
             interface.publish(arm_state_pub, msg)
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
+            interface.loge(f"publish arm state failed: {e}")
 
     def grip_joy_cb(state):
         try:
             msg = Joy()
+            msg.header.stamp = interface.get_timestamp_from_ns(int(state["ts_ns"]))
             msg.axes = [
                 float(state["trigger"]),
                 float(state["axis_x"]),
@@ -65,8 +66,8 @@ def main():
                 int(state["btn_z"]),
             ]
             interface.publish(grip_joy_pub, msg)
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
+            interface.loge(f"publish grip joy failed: {e}")
 
     robot = None
     # ============ driver ============
@@ -87,8 +88,8 @@ def main():
                     "b": np.array(data[12:18], dtype=np.uint8),
                 }
                 robot.set_rgb_cmd(cmd)
-            except Exception:
-                traceback.print_exc()
+            except Exception as e:
+                interface.loge(f"grip led ctrl failed: {e}")
 
         interface.create_subscription("grip_led_ctrl", Int32MultiArray,
                                        node_grip_led_ctrl_cb, 10)

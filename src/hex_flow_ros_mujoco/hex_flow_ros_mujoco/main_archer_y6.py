@@ -16,7 +16,7 @@ def main():
 
     # ============ parameter ============
     # state_rate: state publish rate(Hz) → HexMujocoArcherY6Params → driver state loop
-    interface.set_parameter("state_rate", 500.0)
+    interface.set_parameter("state_rate", 1000.0)
     # cam_rate: camera capture rate(Hz) → driver camera loop
     interface.set_parameter("cam_rate", 30.0)
     # headless: run Mujoco without GUI → driver render config
@@ -58,8 +58,8 @@ def main():
             msg.pose_pos = state["pose_pos"].tolist()
             msg.pose_quat = state["pose_quat"].tolist()
             interface.publish(arm_state_pub, msg)
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
+            interface.loge(f"publish arm state failed: {e}")
 
     def grip_state_cb(state):
         try:
@@ -69,8 +69,8 @@ def main():
             msg.jnt_vel = state["jnt_vel"].tolist()
             msg.jnt_eff = state["jnt_eff"].tolist()
             interface.publish(grip_state_pub, msg)
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
+            interface.loge(f"publish grip state failed: {e}")
 
     def obj_pose_cb(state):
         try:
@@ -85,8 +85,8 @@ def main():
             msg.pose.orientation.z = float(state["pose_quat"][2])
             msg.pose.orientation.w = float(state["pose_quat"][3])
             interface.publish(pose_pub, msg)
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
+            interface.loge(f"publish obj pose failed: {e}")
 
     def color_img_cb(state):
         try:
@@ -100,8 +100,8 @@ def main():
             msg.step = msg.width * 3
             msg.data = state["data"].tobytes()
             interface.publish(color_pub, msg)
-        except Exception:
-            traceback.print_exc()
+        except Exception as e:
+            interface.loge(f"publish color image failed: {e}")
 
     def depth_img_cb(state):
         try:
@@ -115,9 +115,9 @@ def main():
             msg.step = msg.width * 2
             msg.data = state["data"].tobytes()
             interface.publish(depth_pub, msg)
-        except Exception:
-            traceback.print_exc()
-
+        except Exception as e:
+            interface.loge(f"publish depth image failed: {e}")
+            
     # ============ driver ============
     sim = None
     
@@ -129,7 +129,8 @@ def main():
             "color_img": color_img_cb,
             "depth_img": depth_img_cb,
         })
-
+        
+            
         def node_arm_ctrl_cb(msg):
             try:
                 cmd = ros_ctrl_to_driver_cmd(msg, dof=6)
@@ -146,8 +147,8 @@ def main():
                     sim.set_arm_pos_plan_cmd(cmd)
                 elif mode == ArmCtrlMode.POSE_PLAN:
                     sim.set_arm_pose_plan_cmd(cmd)
-            except Exception:
-                traceback.print_exc()
+            except Exception as e:
+                interface.loge(f"arm ctrl failed: {e}")
 
         def node_grip_ctrl_cb(msg):
             try:
@@ -161,9 +162,9 @@ def main():
                     sim.set_grip_pos_cmd(cmd)
                 elif mode == GripCtrlMode.FORCE:
                     sim.set_grip_force_cmd(cmd)
-            except Exception:
-                traceback.print_exc()
-
+            except Exception as e:
+                interface.loge(f"grip ctrl failed: {e}")
+                
         def node_reset_cb(msg):
             if msg.data:
                 sim.reset()
