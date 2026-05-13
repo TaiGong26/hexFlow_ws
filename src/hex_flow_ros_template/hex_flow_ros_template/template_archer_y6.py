@@ -6,7 +6,7 @@ from hex_flow_ros_common.interface import DataInterface
 from hex_flow_ros_common.ctrl_mode import ArmCtrlMode, GripCtrlMode
 from hex_flow_ros_msg.msg import ArmState, ArmCtrl, GripState, GripCtrl
 from sensor_msgs.msg import Joy
-
+from hex_util_runtime import HexRate
 
 class HexFlowTemplateArcherY6:
 
@@ -102,61 +102,136 @@ class HexFlowTemplateArcherY6:
         ctrl.mit_kd = kd.tolist()
         ctrl.lim_err = lim_err
         return ctrl
+    
+    def __build_grip_comp_ctrl(self):
+        ctrl = GripCtrl()
+        ctrl.stamp = self.__interface.get_timestamp()
+        ctrl.ctrl_mode = GripCtrlMode.COMP
+        ctrl.mit_tau = np.zeros(1).tolist()
+        ctrl.mit_kp = np.zeros(1).tolist()
+        ctrl.mit_kd = np.zeros(1).tolist()
+        return ctrl
 
     def __teleop_process(self):
-        self.__interface.set_rate(100.0)
-        prev_q = 0
-        while self.__interface.ok() and not self.__stop_event.is_set():
-            self.__interface.sleep()
-            msg = self.__interface.get("keys", latest=True)
-            if msg is not None:
-                curr_q = msg.buttons[16]  # buttons[16] = 'q'
-                if curr_q and not prev_q:
-                    self.__stop_event.set()
-                prev_q = curr_q
+        try:            
+            rate = HexRate(100.0)
+            prev_q = 0
+            while self.__is_running():
+                rate.sleep()
+                msg = self.__interface.get("keys", latest=True)
+                if msg is not None:
+                    curr_q = msg.buttons[16]  # buttons[16] = 'q'
+                    if curr_q and not prev_q:
+                        self.__stop_event.set()
+                        self.__interface.logi("Exit signal in, arm homing.")
+                        
+                    prev_q = curr_q
+        except Exception as e:
+            self.__interface.loge(f"Exception in template teleop process: {e}")
+            traceback.print_exc()
 
     def __init_process(self):
-        self.__interface.set_rate(self.__rate_hz)
-        while self.__interface.ok() and not self.__stop_event.is_set():
-            self.__interface.sleep()
+        try: 
+            rate = HexRate(self.__rate_hz)
+            while self.__is_running():
+                rate.sleep()
 
-            state_msg = self.__interface.get("arm_state", latest=True)
-            grip_msg = self.__interface.get("grip_state", latest=True)
+                state_msg = self.__interface.get("arm_state", latest=True)
+                grip_msg = self.__interface.get("grip_state", latest=True)
 
-            if state_msg is None:
-                continue
+                if state_msg is None:
+                    continue
 
-            jnt_pos = np.array(state_msg.jnt_pos, dtype=np.float64)
-            arm_err = np.fabs(self.__arm_stable_pos - jnt_pos).max()
-            grip_err = 0.0
-            if grip_msg is not None:
-                grip_pos = np.array(grip_msg.jnt_pos, dtype=np.float64)
-                grip_err = np.fabs(self.__grip_stable_pos - grip_pos).max()
+                jnt_pos = np.array(state_msg.jnt_pos, dtype=np.float64)
+                arm_err = np.fabs(self.__arm_stable_pos - jnt_pos).max()
+                grip_err = 0.0
+                if grip_msg is not None:
+                    grip_pos = np.array(grip_msg.jnt_pos, dtype=np.float64)
+                    grip_err = np.fabs(self.__grip_stable_pos - grip_pos).max()
 
-            if arm_err < self.__arrive_threshold and grip_err < self.__arrive_threshold:
-                return
+                # If both arm and grip are within the arrive threshold, consider arrived and break the loop
+                if arm_err < self.__arrive_threshold and grip_err < self.__arrive_threshold:
+                    return
 
-            ctrl = self.__build_pos_ctrl(
-                self.__arm_stable_pos, self.__arm_kp,
-                self.__arm_kd, self.__arm_err_threshold)
-            self.__interface.publish(self.__arm_ctrl_pub, ctrl)
+                ctrl = self.__build_pos_ctrl(
+                    self.__arm_stable_pos, 
+                    self.__arm_kp,
+                    self.__arm_kd, 
+                    self.__arm_err_threshold
+                )
+                self.__interface.publish(self.__arm_ctrl_pub, ctrl)
 
-            grip_ctrl = self.__build_grip_pos_ctrl(
-                self.__grip_stable_pos, self.__grip_kp,
-                self.__grip_kd, self.__grip_err_threshold)
-            self.__interface.publish(self.__grip_ctrl_pub, grip_ctrl)
-
+                grip_ctrl = self.__build_grip_pos_ctrl(
+                    self.__grip_stable_pos, 
+                    self.__grip_kp,
+                    self.__grip_kd, 
+                    self.__grip_err_threshold
+                )
+                self.__interface.publish(self.__grip_ctrl_pub, grip_ctrl)
+        except Exception as e:
+            self.__interface.loge(f"Exception in template init process: {e}")
+                
+                
     def __work_process(self):
-        self.__interface.set_rate(self.__rate_hz)
-        while self.__interface.ok() and not self.__stop_event.is_set():
-            self.__interface.sleep()
-
-            ctrl = self.__build_comp_ctrl()
-            self.__interface.publish(self.__arm_ctrl_pub, ctrl)
-
+        try:
+            rate = HexRate(self.__rate_hz)
+                
+            while self.__is_running():
+                rate.sleep()
+                arm_ctrl = self.__build_comp_ctrl()
+                self.__interface.publish(self.__arm_ctrl_pub, arm_ctrl)
+                
+                grip_ctrl = self.__build_grip_comp_ctrl()
+                self.__interface.publish(self.__grip_ctrl_pub, grip_ctrl)
+        except Exception as e:
+            self.__interface.loge(f"Exception in template work process: {e}")
+            
     def __exit_process(self):
-        self.__init_process()
+        try: 
+            rate = HexRate(self.__rate_hz)
+            while self.__interface.ok():
+                rate.sleep()
 
+                state_msg = self.__interface.get("arm_state", latest=True)
+                grip_msg = self.__interface.get("grip_state", latest=True)
+
+                if state_msg is None:
+                    continue
+
+                jnt_pos = np.array(state_msg.jnt_pos, dtype=np.float64)
+                arm_err = np.fabs(self.__arm_stable_pos - jnt_pos).max()
+                grip_err = 0.0
+                if grip_msg is not None:
+                    grip_pos = np.array(grip_msg.jnt_pos, dtype=np.float64)
+                    grip_err = np.fabs(self.__grip_stable_pos - grip_pos).max()
+
+                # If both arm and grip are within the arrive threshold, consider arrived and break the loop
+                if arm_err < self.__arrive_threshold and grip_err < self.__arrive_threshold:
+                    return
+
+                ctrl = self.__build_pos_ctrl(
+                    self.__arm_stable_pos, 
+                    self.__arm_kp,
+                    self.__arm_kd, 
+                    self.__arm_err_threshold
+                )
+                self.__interface.publish(self.__arm_ctrl_pub, ctrl)
+
+                grip_ctrl = self.__build_grip_pos_ctrl(
+                    self.__grip_stable_pos, 
+                    self.__grip_kp,
+                    self.__grip_kd, 
+                    self.__grip_err_threshold
+                )
+                self.__interface.publish(self.__grip_ctrl_pub, grip_ctrl)
+        except KeyboardInterrupt:
+            pass
+        except Exception as e:
+            self.__interface.loge(f"Exception in template init process: {e}")
+
+    def __is_running(self):
+        return self.__interface.ok() and not self.__stop_event.is_set()
+    
     def start(self):
         self.__stop_event.clear()
         self.__teleop_thread = threading.Thread(target=self.__teleop_process)
@@ -164,11 +239,20 @@ class HexFlowTemplateArcherY6:
         self.__init_process()
 
     def run(self):
-        self.__work_process()
-
+        try:
+            self.__work_process()
+        except KeyboardInterrupt:
+            pass
+        except Exception as e:
+            self.__interface.loge(f"Exception in template work process: {e}")
+        self.stop()
+        
+        
     def stop(self):
         self.__stop_event.set()
-        if hasattr(self, '_HexFlowTemplateArcherY6__teleop_thread'):
-            self.__teleop_thread.join(timeout=2.0)
+        self.__teleop_thread.join(timeout=2.0)
         self.__exit_process()
         self.__interface.shutdown()
+        self.__interface.logi("Arm homed, ready to exit.")
+        
+        pass
