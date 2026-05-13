@@ -1,6 +1,6 @@
 from launch import LaunchDescription
-from launch_ros.actions import Node, PushRosNamespace
-from launch.actions import GroupAction, DeclareLaunchArgument
+from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 
 
@@ -18,31 +18,34 @@ def generate_launch_description():
         description='Robot controller port.',
     )
 
-    robot_group = GroupAction([
-        PushRosNamespace('robot'),
-        Node(
-            package='hex_flow_ros_robot',
-            executable='hex-robot-archer-y6',
-            name='robot_archer_y6',
-            output='screen',
-            emulate_tty=True,
-            parameters=[{
-                'host': LaunchConfiguration('host'),
-                'port': LaunchConfiguration('port'),
-            }],
-        ),
-    ])
+    robot_node = Node(
+        package='hex_flow_ros_robot',
+        executable='hex-robot-archer-y6',
+        name='robot_archer_y6',
+        output='screen',
+        emulate_tty=True,
+        parameters=[{
+            'host': LaunchConfiguration('host'),
+            'port': LaunchConfiguration('port'),
+        }],
+        remappings=[
+            ('arm_state', '/robot_archer_y6/arm_state'),
+            ('arm_ctrl', '/robot_archer_y6/arm_ctrl'),
+            ('grip_state', '/robot_archer_y6/grip_state'),
+            ('grip_ctrl', '/robot_archer_y6/grip_ctrl'),
+        ],
+    )
 
-    teleop_group = GroupAction([
-        PushRosNamespace('teleop'),
-        Node(
-            package='hex_flow_ros_teleop',
-            executable='hex-teleop-keyboard',
-            name='teleop_keyboard',
-            output='screen',
-            emulate_tty=True,
-        ),
-    ])
+    teleop_node = Node(
+        package='hex_flow_ros_teleop',
+        executable='hex-teleop-keyboard',
+        name='teleop_keyboard',
+        output='screen',
+        emulate_tty=True,
+        remappings=[
+            ('keyboard', '/teleop_keyboard/keyboard'),
+        ],
+    )
 
     template_node = Node(
         package='hex_flow_ros_template',
@@ -55,18 +58,18 @@ def generate_launch_description():
             'arrive_threshold': 0.06,
         }],
         remappings=[
-            ('arm_state', '/robot/arm_state'),
-            ('arm_ctrl', '/robot/arm_ctrl'),
-            ('grip_state', '/robot/grip_state'),
-            ('grip_ctrl', '/robot/grip_ctrl'),
-            ('keys', '/teleop/keyboard'),
+            ('arm_state', '/robot_archer_y6/arm_state'),
+            ('arm_ctrl', '/robot_archer_y6/arm_ctrl'),
+            ('grip_state', '/robot_archer_y6/grip_state'),
+            ('grip_ctrl', '/robot_archer_y6/grip_ctrl'),
+            ('keys', '/teleop_keyboard/keyboard'),
         ],
     )
 
     return LaunchDescription([
         host,
         port,
-        robot_group,
-        teleop_group,
+        robot_node,
+        teleop_node,
         template_node,
     ])
