@@ -1,10 +1,12 @@
 import time
 import traceback
 
+import numpy as np
 import cv2
 from cv_bridge import CvBridge
 from hex_flow_ros_common.interface import DataInterface
 from sensor_msgs.msg import Image
+from hex_util_robot import depth_to_cmap
 
 
 def main():
@@ -17,7 +19,7 @@ def main():
 
     def color_cb(msg):
         try:
-            cv_image = bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
+            cv_image = bridge.imgmsg_to_cv2(msg, desired_encoding=msg.encoding)
             cv2.imshow("RealSense Camera - Color", cv_image)
             cv2.waitKey(1)
         except Exception:
@@ -25,8 +27,9 @@ def main():
 
     def depth_cb(msg):
         try:
-            cv_image = bridge.imgmsg_to_cv2(msg, desired_encoding="16UC1")
-            cv2.imshow("RealSense Camera - Depth", cv_image)
+            frame = bridge.imgmsg_to_cv2(msg, desired_encoding=msg.encoding)
+            depth_cmap = depth_to_cmap(np.asarray(frame.data))
+            cv2.imshow("RealSense Camera - Depth", depth_cmap)
             cv2.waitKey(1)
         except Exception:
             traceback.print_exc()

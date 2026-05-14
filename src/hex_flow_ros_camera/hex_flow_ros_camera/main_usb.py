@@ -68,7 +68,6 @@ def main():
             interface.sleep()
     except KeyboardInterrupt:
         pass
-    finally:
-        if cam:
-            cam.stop()
-        interface.shutdown()
+    if cam:
+        cam.stop()
+    interface.shutdown()

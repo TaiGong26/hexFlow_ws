@@ -138,7 +138,7 @@ def main():
                     int(state["ts_ns"]))
                 msg.header.frame_id = f"camera_{cam}_optical_frame"
                 msg.height, msg.width = state["data"].shape[:2]
-                msg.encoding = "16UC1"
+                msg.encoding = "mono16"
                 msg.is_bigendian = False
                 msg.step = msg.width * 2
                 msg.data = state["data"].tobytes()

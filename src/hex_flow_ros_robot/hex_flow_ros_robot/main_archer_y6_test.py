@@ -32,7 +32,7 @@ def _show_state(arm_state, grip_state, fps_info=""):
 
 
 def main():
-    interface = DataInterface("robot_archer_y6_test", rate_hz=500.0)
+    interface = DataInterface("robot_archer_y6_test", rate_hz=1000.0)
 
     # ============ parameter ============
     interface.set_parameter("rate_hz", 500.0)

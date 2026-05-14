@@ -20,7 +20,7 @@ def main():
     # sens_ts: clock source(true=device clock/false=system clock) → driver timestamp
     interface.set_parameter("sens_ts", False)
     # serial_number: device serial number(empty=auto select) → driver device selection
-    interface.set_parameter("serial_number", "0")
+    interface.set_parameter("serial_number", "")
     # color_encoding: color image encoding format → driver encoding config
     interface.set_parameter("color_encoding", "bgr8")
     # depth_encoding: depth image encoding format → driver encoding config
@@ -32,7 +32,7 @@ def main():
         width=interface.get_parameter("width"),
         cam_buffer_size=interface.get_parameter("cam_buffer_size"),
         sens_ts=interface.get_parameter("sens_ts"),
-        serial_number=interface.get_parameter("serial_number"),
+        serial_number=str(interface.get_parameter("serial_number")),
     )
     color_encoding = interface.get_parameter("color_encoding")
     depth_encoding = interface.get_parameter("depth_encoding")
@@ -87,3 +87,4 @@ def main():
     if cam:
         cam.stop()
     interface.shutdown()
+

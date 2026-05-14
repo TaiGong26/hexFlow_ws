@@ -9,7 +9,7 @@ from hex_flow_ros_msg.msg import ArmState, ArmCtrl, GripState, GripCtrl
 
 
 def main():
-    interface = DataInterface("robot_archer_y6", rate_hz=1.0)
+    interface = DataInterface("robot_archer_y6", rate_hz=1000.0)
 
     # ============ parameter ============
     # host: robot controller IP → HexRobotArcherY6Params → driver connection target
