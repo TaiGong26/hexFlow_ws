@@ -20,7 +20,7 @@ def main():
     # sens_ts: clock source(true=device clock/false=system clock) → driver timestamp
     interface.set_parameter("sens_ts", False)
     # serial_number: device serial number(empty=auto select) → driver device selection
-    interface.set_parameter("serial_number", "")
+    interface.set_parameter("serial_number", "0")
     # exposure: exposure value → driver camera exposure config
     interface.set_parameter("exposure", 10000)
     # gain: gain value → driver camera gain config

@@ -20,7 +20,7 @@ def main():
     # sens_ts: clock source(true=device clock/false=system clock) → driver timestamp
     interface.set_parameter("sens_ts", False)
     # serial_number: device serial number(empty=auto select) → driver device selection
-    interface.set_parameter("serial_number", "")
+    interface.set_parameter("serial_number", "0")
     # color_encoding: color image encoding format → driver encoding config
     interface.set_parameter("color_encoding", "bgr8")
     # depth_encoding: depth image encoding format → driver encoding config
@@ -84,7 +84,6 @@ def main():
             interface.sleep()
     except KeyboardInterrupt:
         pass
-    finally:
-        if cam:
-            cam.stop()
-        interface.shutdown()
+    if cam:
+        cam.stop()
+    interface.shutdown()
