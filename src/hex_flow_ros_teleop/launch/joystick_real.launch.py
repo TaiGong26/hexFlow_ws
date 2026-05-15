@@ -1,0 +1,40 @@
+from launch import LaunchDescription
+from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
+
+
+def generate_launch_description():
+
+    device_path = DeclareLaunchArgument(
+        'device_path',
+        default_value='',
+        description='Device path (empty=auto-detect).',
+    )
+
+    xbox_view_test = DeclareLaunchArgument(
+        'xbox_view_test',
+        default_value='false',
+        description='Enable debug output.',
+    )
+
+    joy_node = Node(
+        package='hex_flow_ros_teleop',
+        executable='hex-teleop-joystick',
+        name='teleop_joystick',
+        output='screen',
+        emulate_tty=True,
+        parameters=[{
+            'device_path': LaunchConfiguration('device_path'),
+            'xbox_view_test': LaunchConfiguration('xbox_view_test'),
+        }],
+        remappings=[
+            ('joy', '/teleop_joystick/joy'),
+        ],
+    )
+
+    return LaunchDescription([
+        device_path,
+        xbox_view_test,
+        joy_node,
+    ])
