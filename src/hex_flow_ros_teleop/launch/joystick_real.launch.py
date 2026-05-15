@@ -18,6 +18,12 @@ def generate_launch_description():
         description='Enable debug output.',
     )
 
+    clock_source = DeclareLaunchArgument(
+        'clock_source',
+        default_value='ptp',
+        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+    )
+
     joy_node = Node(
         package='hex_flow_ros_teleop',
         executable='hex-teleop-joystick',
@@ -27,6 +33,7 @@ def generate_launch_description():
         parameters=[{
             'device_path': LaunchConfiguration('device_path'),
             'xbox_view_test': LaunchConfiguration('xbox_view_test'),
+            'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
             ('joy', '/teleop_joystick/joy'),
@@ -36,5 +43,6 @@ def generate_launch_description():
     return LaunchDescription([
         device_path,
         xbox_view_test,
+        clock_source,
         joy_node,
     ])

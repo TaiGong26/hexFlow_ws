@@ -1,8 +1,16 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 
 
 def generate_launch_description():
+
+    clock_source = DeclareLaunchArgument(
+        'clock_source',
+        default_value='ptp',
+        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+    )
 
     sim_node = Node(
         package='hex_flow_ros_mujoco',
@@ -14,6 +22,7 @@ def generate_launch_description():
             'headless': False,
             'state_rate': 500.0,
             'camera_type': 'usb',
+            'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
             ('arm_state', '/mujoco_archer_y6/arm_state'),
@@ -29,6 +38,9 @@ def generate_launch_description():
         name='teleop_keyboard',
         output='screen',
         emulate_tty=True,
+        parameters=[{
+            'clock_source': LaunchConfiguration('clock_source'),
+        }],
         remappings=[
             ('keyboard', '/teleop_keyboard/keyboard'),
         ],
@@ -54,6 +66,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        clock_source,
         sim_node,
         teleop_node,
         template_node,

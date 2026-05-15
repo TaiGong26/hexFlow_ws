@@ -24,6 +24,8 @@ def main():
     ros_interface.set_parameter("sens_ts", False)
     # led_buffer_size: LED command buffer size → driver RGB LED control
     ros_interface.set_parameter("led_buffer_size", 10)
+    # clock_source: timestamp clock source for published messages (ptp or ros)
+    ros_interface.set_parameter("clock_source", "ptp")
 
     params = HexRobotHelloY6Params(
         host=ros_interface.get_parameter("host"),
@@ -34,6 +36,8 @@ def main():
         led_buffer_size=ros_interface.get_parameter("led_buffer_size"),
     )
 
+    clock_source = ros_interface.get_parameter("clock_source")
+
     # ============ publisher ============
     arm_state_pub = ros_interface.create_publisher("arm_state", ArmState, 10)
     grip_joy_pub = ros_interface.create_publisher("grip_joy", Joy, 10)
@@ -42,7 +46,7 @@ def main():
     def arm_state_cb(state):
         try:
             msg = ArmState()
-            msg.stamp = ros_interface.get_timestamp_from_ns(int(state["ts_ns"]))
+            msg.stamp = ros_interface.get_clocksource_timestamp(clock_source)
             msg.jnt_pos = state["jnt_pos"].tolist()
             msg.jnt_vel = state["jnt_vel"].tolist()
             # jnt_eff intentionally omitted — Zenoh reference does not publish it
@@ -53,7 +57,7 @@ def main():
     def grip_joy_cb(state):
         try:
             msg = Joy()
-            msg.header.stamp = ros_interface.get_timestamp_from_ns(int(state["ts_ns"]))
+            msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source)
             msg.axes = [
                 float(state["trigger"]),
                 float(state["axis_x"]),
@@ -80,9 +84,9 @@ def main():
         def node_grip_led_ctrl_cb(msg):
             try:
                 data = msg.data
+                ts = ros_interface.get_clocksource_timestamp(clock_source)
                 cmd = {
-                    "ts_ns": int(ros_interface.get_timestamp().sec * 1e9
-                                 + ros_interface.get_timestamp().nanosec),
+                    "ts_ns": int(ts.sec * 1e9 + ts.nanosec),
                     "r": np.array(data[0:6], dtype=np.uint8),
                     "g": np.array(data[6:12], dtype=np.uint8),
                     "b": np.array(data[12:18], dtype=np.uint8),

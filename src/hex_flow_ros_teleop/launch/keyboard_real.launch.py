@@ -12,6 +12,12 @@ def generate_launch_description():
         description='Device path (empty=auto-detect).',
     )
 
+    clock_source = DeclareLaunchArgument(
+        'clock_source',
+        default_value='ptp',
+        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+    )
+
     kb_node = Node(
         package='hex_flow_ros_teleop',
         executable='hex-teleop-keyboard',
@@ -20,6 +26,7 @@ def generate_launch_description():
         emulate_tty=True,
         parameters=[{
             'device_path': LaunchConfiguration('device_path'),
+            'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
             ('keyboard', '/teleop_keyboard/keyboard'),
@@ -28,5 +35,6 @@ def generate_launch_description():
 
     return LaunchDescription([
         device_path,
+        clock_source,
         kb_node,
     ])

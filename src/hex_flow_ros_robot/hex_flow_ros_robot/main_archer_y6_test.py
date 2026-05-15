@@ -37,9 +37,11 @@ def main():
     # ============ parameter ============
     ros_interface.set_parameter("rate_hz", 500.0)
     ros_interface.set_parameter("arm_ctrl_mode", "pos")
+    ros_interface.set_parameter("clock_source", "ptp")
 
     ctrl_mode_name = ros_interface.get_parameter("arm_ctrl_mode")
     rate_hz = ros_interface.get_parameter("rate_hz")
+    clock_source = ros_interface.get_parameter("clock_source")
 
     # ============ subscription ============
     arm_state = None
@@ -76,7 +78,7 @@ def main():
                 fps_start = now
 
             ctrl = ArmCtrl()
-            ctrl.stamp = ros_interface.get_timestamp()
+            ctrl.stamp = ros_interface.get_clocksource_timestamp(clock_source)
             ctrl.ctrl_mode = ctrl_mode
             ctrl.jnt_pos = [0.0, -1.5, 3.0, 0.07, 0.0, 0.0]
             # ctrl.jnt_pos = [0.0, -0.0, 0.0, 0.07, 0.0, 0.0] 

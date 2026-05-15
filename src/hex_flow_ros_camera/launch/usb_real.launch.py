@@ -60,6 +60,12 @@ def generate_launch_description():
         description='Color image encoding.',
     )
 
+    clock_source = DeclareLaunchArgument(
+        'clock_source',
+        default_value='ptp',
+        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+    )
+
     cam_node = Node(
         package='hex_flow_ros_camera',
         executable='hex-cam-usb',
@@ -76,6 +82,7 @@ def generate_launch_description():
             'exposure': LaunchConfiguration('exposure'),
             'temperature': LaunchConfiguration('temperature'),
             'color_encoding': LaunchConfiguration('color_encoding'),
+            'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
             ('color', '/cam_usb/color'),
@@ -92,5 +99,6 @@ def generate_launch_description():
         exposure,
         temperature,
         color_encoding,
+        clock_source,
         cam_node,
     ])

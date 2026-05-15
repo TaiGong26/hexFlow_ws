@@ -91,6 +91,10 @@ class InterfaceBase(ABC):
     def get_timestamp(self):
         pass
 
+    @abstractmethod
+    def get_clocksource_timestamp(self, source: str = "ptp"):
+        pass
+
     # ---- Buffered subscription (polling mode) ----
 
     @abstractmethod

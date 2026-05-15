@@ -14,6 +14,10 @@ HexFlow ROS2 teleoperation package supporting joystick and keyboard input device
 - `sensor_msgs`
 - `hex_flow_ros_common`
 - `hex_flow_ros_msg`
+```bash
+
+```
+
 
 ### Python Packages
 ```bash
@@ -24,7 +28,7 @@ pip install evdev
 
 ```bash
 cd <your_ros2_ws>
-colcon build --packages-select hex_flow_ros_teleop
+colcon build 
 source install/setup.bash
 ```
 

@@ -4,7 +4,7 @@ from collections import deque
 import rclpy
 from rclpy.node import Node as RosNode
 from rclpy.time import Time
-from hex_util_runtime import deque_helper
+from hex_util_runtime import HexRate, get_env_float, ns_now, deque_helper
 
 from .interface_base import InterfaceBase
 
@@ -103,6 +103,22 @@ class DataInterface(InterfaceBase):
     def get_timestamp_from_ns(self, ns: int):
         return self.get_timestamp_from_s_ns(
             ns // 1_000_000_000, ns % 1_000_000_000)
+
+    def get_clocksource_timestamp(self, source: str = "ptp"):
+        """
+        Get timestamp from specified clock source.
+
+        Args:
+            source: "ptp" for ns_now (Hex PTP clock), "ros" for rclpy Time
+
+        Returns:
+            Time message with nanoseconds from selected clock source
+        """
+        if source == "ptp":
+            ns = ns_now()
+            return self.get_timestamp_from_ns(int(ns))
+        else:  # "ros"
+            return self.get_timestamp()
 
     # ---- Internal ----
 

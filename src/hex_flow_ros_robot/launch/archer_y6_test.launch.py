@@ -4,14 +4,19 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
-    
+
     host = DeclareLaunchArgument(
         'host',
         default_value='0.0.0.0',
         description='Robot controller IP address.',
     )
-    
-    
+
+    clock_source = DeclareLaunchArgument(
+        'clock_source',
+        default_value='ptp',
+        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+    )
+
     robot_node = Node(
         package='hex_flow_ros_robot',
         executable='hex-robot-archer-y6',
@@ -21,6 +26,7 @@ def generate_launch_description():
         parameters=[{
             'host': LaunchConfiguration('host'),
             'port': 8439,
+            'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
             ('arm_state', 'robot_archer_y6/arm_state'),
@@ -46,6 +52,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         host,
-        robot_node, 
+        clock_source,
+        robot_node,
         test_node
         ])

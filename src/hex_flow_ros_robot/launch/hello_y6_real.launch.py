@@ -42,6 +42,12 @@ def generate_launch_description():
         description='LED command buffer size.',
     )
 
+    clock_source = DeclareLaunchArgument(
+        'clock_source',
+        default_value='ptp',
+        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+    )
+
     robot_node = Node(
         package='hex_flow_ros_robot',
         executable='hex-robot-hello-y6',
@@ -55,6 +61,7 @@ def generate_launch_description():
             'state_buffer_size': LaunchConfiguration('state_buffer_size'),
             'sens_ts': LaunchConfiguration('sens_ts'),
             'led_buffer_size': LaunchConfiguration('led_buffer_size'),
+            'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
             ('arm_state', '/robot_hello_y6/arm_state'),
@@ -70,5 +77,6 @@ def generate_launch_description():
         state_buffer_size,
         sens_ts,
         led_buffer_size,
+        clock_source,
         robot_node,
     ])

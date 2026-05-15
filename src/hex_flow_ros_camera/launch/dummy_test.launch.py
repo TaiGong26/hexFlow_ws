@@ -41,6 +41,12 @@ def generate_launch_description():
         description='Color image encoding.',
     )
 
+    clock_source = DeclareLaunchArgument(
+        'clock_source',
+        default_value='ptp',
+        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+    )
+
     cam_node = Node(
         package='hex_flow_ros_camera',
         executable='hex-cam-dummy',
@@ -54,6 +60,7 @@ def generate_launch_description():
             'cam_buffer_size': LaunchConfiguration('cam_buffer_size'),
             'sens_ts': LaunchConfiguration('sens_ts'),
             'color_encoding': LaunchConfiguration('color_encoding'),
+            'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
             ('color', '/cam_dummy/color'),
@@ -71,6 +78,7 @@ def generate_launch_description():
             'cam_buffer_size': LaunchConfiguration('cam_buffer_size'),
             'sens_ts': LaunchConfiguration('sens_ts'),
             'color_encoding': LaunchConfiguration('color_encoding'),
+            'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
             ('color', '/cam_dummy/color'),
@@ -84,6 +92,7 @@ def generate_launch_description():
         cam_buffer_size,
         sens_ts,
         color_encoding,
+        clock_source,
         cam_node,
         test_node,
     ])

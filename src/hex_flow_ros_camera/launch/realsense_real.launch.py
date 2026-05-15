@@ -54,6 +54,12 @@ def generate_launch_description():
         description='Depth image encoding.',
     )
 
+    clock_source = DeclareLaunchArgument(
+        'clock_source',
+        default_value='ptp',
+        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+    )
+
     cam_node = Node(
         package='hex_flow_ros_camera',
         executable='hex-cam-realsense',
@@ -69,6 +75,7 @@ def generate_launch_description():
             'serial_number': LaunchConfiguration('serial_number'),
             'color_encoding': LaunchConfiguration('color_encoding'),
             'depth_encoding': LaunchConfiguration('depth_encoding'),
+            'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
             ('color', '/cam_realsense/color'),
@@ -85,5 +92,6 @@ def generate_launch_description():
         serial_number,
         color_encoding,
         depth_encoding,
+        clock_source,
         cam_node,
     ])

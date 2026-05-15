@@ -54,6 +54,12 @@ def generate_launch_description():
         description='Right arm camera type.',
     )
 
+    clock_source = DeclareLaunchArgument(
+        'clock_source',
+        default_value='ptp',
+        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+    )
+
     sim_node = Node(
         package='hex_flow_ros_mujoco',
         executable='hex-mujoco-e3-desktop',
@@ -70,6 +76,7 @@ def generate_launch_description():
             'left_cam_type': LaunchConfiguration('left_cam_type'),
             'right_cam_type': LaunchConfiguration('right_cam_type'),
             'cam_rate': 30.0,
+            'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
             ('left_arm_state', '/mujoco_e3_desktop/left_arm_state'),
@@ -92,5 +99,6 @@ def generate_launch_description():
         head_cam,
         left_cam,
         right_cam,
+        clock_source,
         sim_node,
     ])

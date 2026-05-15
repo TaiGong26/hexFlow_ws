@@ -27,6 +27,8 @@ def main():
     # pose_end_in_flange: end-effector pose relative to flange → driver kinematics
     ros_interface.set_parameter("pose_end_in_flange",
                             [0.187, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0])
+    # clock_source: timestamp clock source for published messages (ptp or ros)
+    ros_interface.set_parameter("clock_source", "ptp")
 
     params = HexRobotFireflyY6Params(
         host=ros_interface.get_parameter("host"),
@@ -39,6 +41,8 @@ def main():
             ros_interface.get_parameter("pose_end_in_flange"), dtype=np.float64),
     )
 
+    clock_source = ros_interface.get_parameter("clock_source")
+
     # ============ publisher ============
     arm_state_pub = ros_interface.create_publisher("arm_state", ArmState, 10)
     grip_state_pub = ros_interface.create_publisher("grip_state", GripState, 10)
@@ -48,7 +52,7 @@ def main():
     def arm_state_cb(state):
         try:
             msg = ArmState()
-            msg.stamp = ros_interface.get_timestamp_from_ns(int(state["ts_ns"]))
+            msg.stamp = ros_interface.get_clocksource_timestamp(clock_source)
             msg.jnt_pos = state["jnt_pos"].tolist()
             msg.jnt_vel = state["jnt_vel"].tolist()
             msg.jnt_eff = state["jnt_eff"].tolist()
@@ -61,7 +65,7 @@ def main():
     def grip_state_cb(state):
         try:
             msg = GripState()
-            msg.stamp = ros_interface.get_timestamp_from_ns(int(state["ts_ns"]))
+            msg.stamp = ros_interface.get_clocksource_timestamp(clock_source)
             msg.jnt_pos = state["jnt_pos"].tolist()
             msg.jnt_vel = state["jnt_vel"].tolist()
             msg.jnt_eff = state["jnt_eff"].tolist()

@@ -18,6 +18,12 @@ def generate_launch_description():
         description='Robot controller port.',
     )
 
+    clock_source = DeclareLaunchArgument(
+        'clock_source',
+        default_value='ptp',
+        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+    )
+
     robot_node = Node(
         package='hex_flow_ros_robot',
         executable='hex-robot-archer-y6',
@@ -27,6 +33,7 @@ def generate_launch_description():
         parameters=[{
             'host': LaunchConfiguration('host'),
             'port': LaunchConfiguration('port'),
+            'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
             ('arm_state', '/robot_archer_y6/arm_state'),
@@ -42,6 +49,9 @@ def generate_launch_description():
         name='teleop_keyboard',
         output='screen',
         emulate_tty=True,
+        parameters=[{
+            'clock_source': LaunchConfiguration('clock_source'),
+        }],
         remappings=[
             ('keyboard', '/teleop_keyboard/keyboard'),
         ],
@@ -69,6 +79,7 @@ def generate_launch_description():
     return LaunchDescription([
         host,
         port,
+        clock_source,
         robot_node,
         teleop_node,
         template_node,

@@ -32,8 +32,10 @@ class HexFlowTemplateE3Desktop:
         self.__ros_interface.set_parameter("arrive_threshold", 0.06)
         self.__ros_interface.set_parameter("arm_err_threshold", 0.02)
         self.__ros_interface.set_parameter("grip_err_threshold", 0.02)
+        self.__ros_interface.set_parameter("clock_source", "ptp")
 
         self.__rate_hz = self.__ros_interface.get_parameter("rate_hz")
+        self.__clock_source = self.__ros_interface.get_parameter("clock_source")
         self.__arm_stable_pos = np.array(
             self.__ros_interface.get_parameter("arm_stable_pos"), dtype=np.float64)
         self.__grip_stable_pos = np.array(
@@ -73,7 +75,7 @@ class HexFlowTemplateE3Desktop:
 
     def __build_pos_ctrl(self, stable_pos, kp, kd, lim_err):
         ctrl = ArmCtrl()
-        ctrl.stamp = self.__ros_interface.get_timestamp()
+        ctrl.stamp = self.__ros_interface.get_clocksource_timestamp(self.__clock_source)
         ctrl.ctrl_mode = ArmCtrlMode.POS
         ctrl.jnt_pos = stable_pos.tolist()
         ctrl.mit_kp = kp.tolist()
@@ -83,7 +85,7 @@ class HexFlowTemplateE3Desktop:
 
     def __build_comp_ctrl(self):
         ctrl = ArmCtrl()
-        ctrl.stamp = self.__ros_interface.get_timestamp()
+        ctrl.stamp = self.__ros_interface.get_clocksource_timestamp(self.__clock_source)
         ctrl.ctrl_mode = ArmCtrlMode.COMP
         ctrl.mit_tau = np.zeros(6).tolist()
         ctrl.mit_kp = np.zeros(6).tolist()
@@ -92,7 +94,7 @@ class HexFlowTemplateE3Desktop:
 
     def __build_grip_pos_ctrl(self, stable_pos, kp, kd, lim_err):
         ctrl = GripCtrl()
-        ctrl.stamp = self.__ros_interface.get_timestamp()
+        ctrl.stamp = self.__ros_interface.get_clocksource_timestamp(self.__clock_source)
         ctrl.ctrl_mode = GripCtrlMode.POS
         ctrl.jnt_pos = stable_pos.tolist()
         ctrl.mit_kp = kp.tolist()
@@ -102,7 +104,7 @@ class HexFlowTemplateE3Desktop:
     
     def __build_grip_comp_ctrl(self):
         ctrl = GripCtrl()
-        ctrl.stamp = self.__ros_interface.get_timestamp()
+        ctrl.stamp = self.__ros_interface.get_clocksource_timestamp(self.__clock_source)
         ctrl.ctrl_mode = GripCtrlMode.COMP
         ctrl.mit_tau = np.zeros(1).tolist()
         ctrl.mit_kp = np.zeros(1).tolist()

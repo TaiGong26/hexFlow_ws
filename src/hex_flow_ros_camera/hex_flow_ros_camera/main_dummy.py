@@ -21,6 +21,8 @@ def main():
     ros_interface.set_parameter("sens_ts", False)
     # color_encoding: color image encoding format → driver encoding config
     ros_interface.set_parameter("color_encoding", "bgr8")
+    # clock_source: timestamp clock source for published messages (ptp or ros)
+    ros_interface.set_parameter("clock_source", "ptp")
 
     params = HexCamDummyParams(
         frame_rate=ros_interface.get_parameter("frame_rate"),
@@ -32,14 +34,15 @@ def main():
     
     color_encoding = ros_interface.get_parameter("color_encoding")
 
+    clock_source = ros_interface.get_parameter("clock_source")
+
     # ============ publisher ============
     color_pub = ros_interface.create_publisher("color", Image, 10)
 
     def color_cb(state):
         try:
             msg = Image()
-            msg.header.stamp = ros_interface.get_timestamp_from_ns(
-                int(state["ts_ns"]))
+            msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source)
             msg.header.frame_id = "camera_color_optical_frame"
             msg.height, msg.width = state["data"].shape[:2]
             msg.encoding = color_encoding

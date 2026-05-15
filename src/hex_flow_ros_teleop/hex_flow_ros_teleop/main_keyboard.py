@@ -65,8 +65,10 @@ class KeyboardStateReader:
 def main():
     ros_interface = DataInterface("teleop_keyboard", rate_hz=100.0)
     ros_interface.set_parameter("device_path", "")
+    ros_interface.set_parameter("clock_source", "ptp")
 
     device_path = ros_interface.get_parameter("device_path")
+    clock_source = ros_interface.get_parameter("clock_source")
     if device_path:
         devices = [InputDevice(device_path)]
         print(f"[keyboard] using: {devices[0].path} {devices[0].name}")
@@ -92,7 +94,7 @@ def main():
             ros_interface.sleep()
             state = reader.get_state()
             msg = Joy()
-            msg.header.stamp = ros_interface.get_timestamp()
+            msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source)
             msg.buttons = [state[name] for name in _LETTER_NAMES]
             ros_interface.publish(kb_pub, msg)
     except KeyboardInterrupt:

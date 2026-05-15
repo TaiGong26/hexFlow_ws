@@ -170,6 +170,8 @@ def main():
     ros_interface = DataInterface("teleop_joystick", rate_hz=100.0)
     ros_interface.set_parameter("device_path", "")
     ros_interface.set_parameter("xbox_view_test", False)
+    # clock_source: timestamp clock source for published messages (ptp or ros)
+    ros_interface.set_parameter("clock_source", "ptp")
 
     device_path = ros_interface.get_parameter("device_path")
     if device_path:
@@ -185,6 +187,8 @@ def main():
 
     joy_pub = ros_interface.create_publisher("joy", Joy, 10)
 
+    clock_source = ros_interface.get_parameter("clock_source")
+
     device = devices[0]
     reader = JoystickStateReader(device)
     reader.start()
@@ -193,7 +197,7 @@ def main():
         while ros_interface.ok():
             ros_interface.sleep()
             msg = Joy()
-            msg.header.stamp = ros_interface.get_timestamp()
+            msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source)
             msg.buttons = reader.get_buttons()
             msg.axes = reader.get_axes()
             ros_interface.publish(joy_pub, msg)

@@ -37,6 +37,12 @@ def generate_launch_description():
         description='Use device clock for timestamps.',
     )
 
+    clock_source = DeclareLaunchArgument(
+        'clock_source',
+        default_value='ptp',
+        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+    )
+
     sim_node = Node(
         package='hex_flow_ros_mujoco',
         executable='hex-mujoco-archer-y6',
@@ -51,6 +57,7 @@ def generate_launch_description():
             'sens_ts': LaunchConfiguration('sens_ts'),
             'cam_rate': 30.0,
             'camera_type': 'usb',
+            'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
             ('arm_state', '/mujoco_archer_y6/arm_state'),
@@ -67,5 +74,6 @@ def generate_launch_description():
         state_buffer_size,
         cam_buffer_size,
         sens_ts,
+        clock_source,
         sim_node,
     ])

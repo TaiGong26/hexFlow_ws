@@ -1,8 +1,16 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 
 
 def generate_launch_description():
+
+    clock_source = DeclareLaunchArgument(
+        'clock_source',
+        default_value='ptp',
+        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+    )
 
     sim_node = Node(
         package='hex_flow_ros_mujoco',
@@ -13,6 +21,7 @@ def generate_launch_description():
         parameters=[{
             'state_rate': 1000.0,
             'headless': False,
+            'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
             ('left_arm_state', 'mujoco_e3_desktop/left_arm_state'),
@@ -49,4 +58,4 @@ def generate_launch_description():
         ],
     )
 
-    return LaunchDescription([sim_node, test_node])
+    return LaunchDescription([clock_source, sim_node, test_node])
