@@ -37,18 +37,6 @@ def generate_launch_description():
         description='Use device clock for timestamps.',
     )
 
-    enable_keyboard = DeclareLaunchArgument(
-        'enable_keyboard',
-        default_value='false',
-        description='Whether to enable the keyboard teleop node.',
-    )
-
-    enable_joystick = DeclareLaunchArgument(
-        'enable_joystick',
-        default_value='false',
-        description='Whether to enable the joystick teleop node.',
-    )
-
     sim_node = Node(
         package='hex_flow_ros_mujoco',
         executable='hex-mujoco-archer-y6',
@@ -102,8 +90,6 @@ def generate_launch_description():
         state_buffer_size,
         cam_buffer_size,
         sens_ts,
-        enable_keyboard,
-        enable_joystick,
         sim_node,
         teleop_keyboard_node,
         teleop_joystick_node,
