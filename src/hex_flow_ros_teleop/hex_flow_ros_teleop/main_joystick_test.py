@@ -7,10 +7,10 @@ from sensor_msgs.msg import Joy
 
 
 def main():
-    interface = DataInterface("teleop_joystick_test", rate_hz=10.0)
+    ros_interface = DataInterface("teleop_joystick_test", rate_hz=10.0)
 
     # ============ parameter ============
-    interface.set_parameter("rate_hz", 10.0)
+    ros_interface.set_parameter("rate_hz", 10.0)
 
     def joy_cb(msg):
         output = f"\033[H=== Joystick Test ===\033[K\n"
@@ -20,12 +20,12 @@ def main():
         output += "\033[J"
         print(output, end="", flush=True)
 
-    interface.create_subscription("joy", Joy, joy_cb, 10)
+    ros_interface.create_subscription("joy", Joy, joy_cb, 10)
 
     try:
-        while interface.ok():
-            interface.sleep()
+        while ros_interface.ok():
+            ros_interface.sleep()
     except KeyboardInterrupt:
         pass
     finally:
-        interface.shutdown()
+        ros_interface.shutdown()

@@ -63,10 +63,10 @@ class KeyboardStateReader:
 
 
 def main():
-    interface = DataInterface("teleop_keyboard", rate_hz=100.0)
-    interface.set_parameter("device_path", "")
+    ros_interface = DataInterface("teleop_keyboard", rate_hz=100.0)
+    ros_interface.set_parameter("device_path", "")
 
-    device_path = interface.get_parameter("device_path")
+    device_path = ros_interface.get_parameter("device_path")
     if device_path:
         devices = [InputDevice(device_path)]
         print(f"[keyboard] using: {devices[0].path} {devices[0].name}")
@@ -79,23 +79,24 @@ def main():
                "accessing /dev/input/*\n"
                "[keyboard] Please add your user to the 'input' group and re-login:\n"
                "[keyboard]   sudo usermod -aG input $USER"))
-        interface.shutdown()
+        ros_interface.shutdown()
         return
 
-    kb_pub = interface.create_publisher("keyboard", Joy, 10)
+    kb_pub = ros_interface.create_publisher("keyboard", Joy, 10)
 
     reader = KeyboardStateReader(devices)
     reader.start()
 
     try:
-        while interface.ok():
-            interface.sleep()
+        while ros_interface.ok():
+            ros_interface.sleep()
             state = reader.get_state()
             msg = Joy()
+            msg.header.stamp = ros_interface.get_timestamp()
             msg.buttons = [state[name] for name in _LETTER_NAMES]
-            interface.publish(kb_pub, msg)
+            ros_interface.publish(kb_pub, msg)
     except KeyboardInterrupt:
         pass
     finally:
         reader.stop()
-        interface.shutdown()
+        ros_interface.shutdown()

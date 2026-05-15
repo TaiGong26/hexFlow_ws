@@ -1,3 +1,4 @@
+
 import os
 import select
 import threading
@@ -166,11 +167,11 @@ class JoystickStateReader:
 
 
 def main():
-    interface = DataInterface("teleop_joystick", rate_hz=100.0)
-    interface.set_parameter("device_path", "")
-    interface.set_parameter("xbox_view_test", False)
+    ros_interface = DataInterface("teleop_joystick", rate_hz=100.0)
+    ros_interface.set_parameter("device_path", "")
+    ros_interface.set_parameter("xbox_view_test", False)
 
-    device_path = interface.get_parameter("device_path")
+    device_path = ros_interface.get_parameter("device_path")
     if device_path:
         devices = [InputDevice(device_path)]
         print(f"[joystick] using: {devices[0].path} {devices[0].name}")
@@ -179,25 +180,26 @@ def main():
 
     if not devices:
         print("[joystick] no joystick device found")
-        interface.shutdown()
+        ros_interface.shutdown()
         return
 
-    joy_pub = interface.create_publisher("joy", Joy, 10)
+    joy_pub = ros_interface.create_publisher("joy", Joy, 10)
 
     device = devices[0]
     reader = JoystickStateReader(device)
     reader.start()
-    reader.set_view(interface.get_parameter("xbox_view_test"))
+    reader.set_view(ros_interface.get_parameter("xbox_view_test"))
     try:
-        while interface.ok():
-            interface.sleep()
+        while ros_interface.ok():
+            ros_interface.sleep()
             msg = Joy()
+            msg.header.stamp = ros_interface.get_timestamp()
             msg.buttons = reader.get_buttons()
             msg.axes = reader.get_axes()
-            interface.publish(joy_pub, msg)
+            ros_interface.publish(joy_pub, msg)
     except KeyboardInterrupt:
         pass
     finally:
         reader.stop()
-        interface.shutdown()
+        ros_interface.shutdown()
 

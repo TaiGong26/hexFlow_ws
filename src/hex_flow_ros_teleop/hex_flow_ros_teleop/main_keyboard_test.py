@@ -7,10 +7,10 @@ from sensor_msgs.msg import Joy
 
 
 def main():
-    interface = DataInterface("teleop_keyboard_test", rate_hz=10.0)
+    ros_interface = DataInterface("teleop_keyboard_test", rate_hz=10.0)
 
     # ============ parameter ============
-    interface.set_parameter("rate_hz", 10.0)
+    ros_interface.set_parameter("rate_hz", 10.0)
 
     _LETTER_NAMES = [chr(c) for c in range(ord('a'), ord('z') + 1)]
 
@@ -22,12 +22,12 @@ def main():
         output += "\033[J"
         print(output, end="", flush=True)
 
-    interface.create_subscription("keyboard", Joy, kb_cb, 10)
+    ros_interface.create_subscription("keyboard", Joy, kb_cb, 10)
 
     try:
-        while interface.ok():
-            interface.sleep()
+        while ros_interface.ok():
+            ros_interface.sleep()
     except KeyboardInterrupt:
         pass
     finally:
-        interface.shutdown()
+        ros_interface.shutdown()

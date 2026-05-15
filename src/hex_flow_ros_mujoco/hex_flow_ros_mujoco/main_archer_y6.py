@@ -12,70 +12,70 @@ from std_msgs.msg import Bool
 
 
 def main():
-    interface = DataInterface("mujoco_archer_y6", rate_hz=1.0)
+    ros_interface = DataInterface("mujoco_archer_y6", rate_hz=1.0)
 
     # ============ parameter ============
     # state_rate: state publish rate(Hz) → HexMujocoArcherY6Params → driver state loop
-    interface.set_parameter("state_rate", 1000.0)
+    ros_interface.set_parameter("state_rate", 1000.0)
     # cam_rate: camera capture rate(Hz) → driver camera loop
-    interface.set_parameter("cam_rate", 30.0)
+    ros_interface.set_parameter("cam_rate", 30.0)
     # headless: run Mujoco without GUI → driver render config
-    interface.set_parameter("headless", False)
+    ros_interface.set_parameter("headless", False)
     # state_buffer_size: state buffer size → driver state cache
-    interface.set_parameter("state_buffer_size", 200)
+    ros_interface.set_parameter("state_buffer_size", 200)
     # cam_buffer_size: camera buffer size → driver frame cache
-    interface.set_parameter("cam_buffer_size", 8)
+    ros_interface.set_parameter("cam_buffer_size", 8)
     # sens_ts: clock source(true=device clock/false=system clock) → driver timestamp
-    interface.set_parameter("sens_ts", False)
+    ros_interface.set_parameter("sens_ts", False)
     # camera_type: simulation camera type → driver camera config
-    interface.set_parameter("camera_type", "usb")
+    ros_interface.set_parameter("camera_type", "usb")
 
     params = HexMujocoArcherY6Params(
-        state_rate=interface.get_parameter("state_rate"),
-        cam_rate=interface.get_parameter("cam_rate"),
-        headless=interface.get_parameter("headless"),
-        state_buffer_size=interface.get_parameter("state_buffer_size"),
-        cam_buffer_size=interface.get_parameter("cam_buffer_size"),
-        sens_ts=interface.get_parameter("sens_ts"),
-        camera_type=interface.get_parameter("camera_type"),
+        state_rate=ros_interface.get_parameter("state_rate"),
+        cam_rate=ros_interface.get_parameter("cam_rate"),
+        headless=ros_interface.get_parameter("headless"),
+        state_buffer_size=ros_interface.get_parameter("state_buffer_size"),
+        cam_buffer_size=ros_interface.get_parameter("cam_buffer_size"),
+        sens_ts=ros_interface.get_parameter("sens_ts"),
+        camera_type=ros_interface.get_parameter("camera_type"),
     )
 
     # ============ publisher ============
-    arm_state_pub = interface.create_publisher("arm_state", ArmState, 10)
-    grip_state_pub = interface.create_publisher("grip_state", GripState, 10)
-    pose_pub = interface.create_publisher("obj_pose", PoseStamped, 10)
-    color_pub = interface.create_publisher("color", Image, 10)
-    depth_pub = interface.create_publisher("depth", Image, 10)
+    arm_state_pub = ros_interface.create_publisher("arm_state", ArmState, 10)
+    grip_state_pub = ros_interface.create_publisher("grip_state", GripState, 10)
+    pose_pub = ros_interface.create_publisher("obj_pose", PoseStamped, 10)
+    color_pub = ros_interface.create_publisher("color", Image, 10)
+    depth_pub = ros_interface.create_publisher("depth", Image, 10)
 
 
     def arm_state_cb(state):
         try:
             msg = ArmState()
-            msg.stamp = interface.get_timestamp_from_ns(int(state["ts_ns"]))
+            msg.stamp = ros_interface.get_timestamp_from_ns(int(state["ts_ns"]))
             msg.jnt_pos = state["jnt_pos"].tolist()
             msg.jnt_vel = state["jnt_vel"].tolist()
             msg.jnt_eff = state["jnt_eff"].tolist()
             msg.pose_pos = state["pose_pos"].tolist()
             msg.pose_quat = state["pose_quat"].tolist()
-            interface.publish(arm_state_pub, msg)
+            ros_interface.publish(arm_state_pub, msg)
         except Exception as e:
-            interface.loge(f"publish arm state failed: {e}")
+            ros_interface.loge(f"publish arm state failed: {e}")
 
     def grip_state_cb(state):
         try:
             msg = GripState()
-            msg.stamp = interface.get_timestamp_from_ns(int(state["ts_ns"]))
+            msg.stamp = ros_interface.get_timestamp_from_ns(int(state["ts_ns"]))
             msg.jnt_pos = state["jnt_pos"].tolist()
             msg.jnt_vel = state["jnt_vel"].tolist()
             msg.jnt_eff = state["jnt_eff"].tolist()
-            interface.publish(grip_state_pub, msg)
+            ros_interface.publish(grip_state_pub, msg)
         except Exception as e:
-            interface.loge(f"publish grip state failed: {e}")
+            ros_interface.loge(f"publish grip state failed: {e}")
 
     def obj_pose_cb(state):
         try:
             msg = PoseStamped()
-            msg.header.stamp = interface.get_timestamp_from_ns(
+            msg.header.stamp = ros_interface.get_timestamp_from_ns(
                 int(state["ts_ns"]))
             msg.pose.position.x = float(state["pose_pos"][0])
             msg.pose.position.y = float(state["pose_pos"][1])
@@ -84,14 +84,14 @@ def main():
             msg.pose.orientation.y = float(state["pose_quat"][1])
             msg.pose.orientation.z = float(state["pose_quat"][2])
             msg.pose.orientation.w = float(state["pose_quat"][3])
-            interface.publish(pose_pub, msg)
+            ros_interface.publish(pose_pub, msg)
         except Exception as e:
-            interface.loge(f"publish obj pose failed: {e}")
+            ros_interface.loge(f"publish obj pose failed: {e}")
 
     def color_img_cb(state):
         try:
             msg = Image()
-            msg.header.stamp = interface.get_timestamp_from_ns(
+            msg.header.stamp = ros_interface.get_timestamp_from_ns(
                 int(state["ts_ns"]))
             msg.header.frame_id = "camera_color_optical_frame"
             msg.height, msg.width = state["data"].shape[:2]
@@ -99,14 +99,14 @@ def main():
             msg.is_bigendian = False
             msg.step = msg.width * 3
             msg.data = state["data"].tobytes()
-            interface.publish(color_pub, msg)
+            ros_interface.publish(color_pub, msg)
         except Exception as e:
-            interface.loge(f"publish color image failed: {e}")
+            ros_interface.loge(f"publish color image failed: {e}")
 
     def depth_img_cb(state):
         try:
             msg = Image()
-            msg.header.stamp = interface.get_timestamp_from_ns(
+            msg.header.stamp = ros_interface.get_timestamp_from_ns(
                 int(state["ts_ns"]))
             msg.header.frame_id = "camera_depth_optical_frame"
             msg.height, msg.width = state["data"].shape[:2]
@@ -114,9 +114,9 @@ def main():
             msg.is_bigendian = False
             msg.step = msg.width * 2
             msg.data = state["data"].tobytes()
-            interface.publish(depth_pub, msg)
+            ros_interface.publish(depth_pub, msg)
         except Exception as e:
-            interface.loge(f"publish depth image failed: {e}")
+            ros_interface.loge(f"publish depth image failed: {e}")
             
     # ============ driver ============
     sim = None
@@ -148,7 +148,7 @@ def main():
                 elif mode == ArmCtrlMode.POSE_PLAN:
                     sim.set_arm_pose_plan_cmd(cmd)
             except Exception as e:
-                interface.loge(f"arm ctrl failed: {e}")
+                ros_interface.loge(f"arm ctrl failed: {e}")
 
         def node_grip_ctrl_cb(msg):
             try:
@@ -163,22 +163,22 @@ def main():
                 elif mode == GripCtrlMode.FORCE:
                     sim.set_grip_force_cmd(cmd)
             except Exception as e:
-                interface.loge(f"grip ctrl failed: {e}")
+                ros_interface.loge(f"grip ctrl failed: {e}")
                 
         def node_reset_cb(msg):
             if msg.data:
                 sim.reset()
 
-        interface.create_subscription("arm_ctrl", ArmCtrl, node_arm_ctrl_cb, 10)
-        interface.create_subscription("grip_ctrl", GripCtrl, node_grip_ctrl_cb, 10)
-        interface.create_subscription("reset", Bool, node_reset_cb, 10)
+        ros_interface.create_subscription("arm_ctrl", ArmCtrl, node_arm_ctrl_cb, 10)
+        ros_interface.create_subscription("grip_ctrl", GripCtrl, node_grip_ctrl_cb, 10)
+        ros_interface.create_subscription("reset", Bool, node_reset_cb, 10)
         sim.start()
 
-        while interface.ok():
-            interface.sleep()
+        while ros_interface.ok():
+            ros_interface.sleep()
     except KeyboardInterrupt:
         pass
     finally:
         if sim:
             sim.stop()
-        interface.shutdown()
+        ros_interface.shutdown()

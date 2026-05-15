@@ -8,10 +8,10 @@ from sensor_msgs.msg import Image
 
 
 def main():
-    interface = DataInterface("cam_dummy_test", rate_hz=30.0)
+    ros_interface = DataInterface("cam_dummy_test", rate_hz=30.0)
 
     # ============ parameter ============
-    interface.set_parameter("rate_hz", 30.0)
+    ros_interface.set_parameter("rate_hz", 30.0)
 
     bridge = CvBridge()
 
@@ -23,13 +23,13 @@ def main():
         except Exception:
             traceback.print_exc()
 
-    interface.create_subscription("color", Image, color_cb, 10)
+    ros_interface.create_subscription("color", Image, color_cb, 10)
 
     try:
-        while interface.ok():
-            interface.sleep()
+        while ros_interface.ok():
+            ros_interface.sleep()
     except KeyboardInterrupt:
         pass
     finally:
         cv2.destroyAllWindows()
-        interface.shutdown()
+        ros_interface.shutdown()

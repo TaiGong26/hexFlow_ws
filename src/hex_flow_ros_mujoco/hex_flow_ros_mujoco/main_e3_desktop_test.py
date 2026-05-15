@@ -24,14 +24,14 @@ def _show_state(states, fps_info=""):
 
 
 def main():
-    interface = DataInterface("mujoco_e3_desktop_test", rate_hz=100.0)
+    ros_interface = DataInterface("mujoco_e3_desktop_test", rate_hz=100.0)
 
     # ============ parameter ============
-    interface.set_parameter("rate_hz", 100.0)
-    interface.set_parameter("arm_ctrl_mode", "pos")
+    ros_interface.set_parameter("rate_hz", 100.0)
+    ros_interface.set_parameter("arm_ctrl_mode", "pos")
 
-    ctrl_mode_name = interface.get_parameter("arm_ctrl_mode")
-    rate_hz = interface.get_parameter("rate_hz")
+    ctrl_mode_name = ros_interface.get_parameter("arm_ctrl_mode")
+    rate_hz = ros_interface.get_parameter("rate_hz")
 
     states = {}
 
@@ -40,20 +40,20 @@ def main():
             def cb(msg):
                 states[s] = msg
             return cb
-        interface.create_subscription(f"{side}_arm_state", ArmState, make_cb(side), 10)
+        ros_interface.create_subscription(f"{side}_arm_state", ArmState, make_cb(side), 10)
 
     arm_ctrl_pubs = {}
     for side in ("left", "right"):
-        arm_ctrl_pubs[side] = interface.create_publisher(f"{side}_arm_ctrl", ArmCtrl, 10)
+        arm_ctrl_pubs[side] = ros_interface.create_publisher(f"{side}_arm_ctrl", ArmCtrl, 10)
 
     ctrl_mode = ArmCtrlMode.POS
 
-    interface.set_rate(rate_hz)
+    ros_interface.set_rate(rate_hz)
     fps_cnt, fps_start = 0, time.perf_counter_ns()
     fps_info = ""
     try:
-        while interface.ok():
-            interface.sleep()
+        while ros_interface.ok():
+            ros_interface.sleep()
 
             fps_cnt += 1
             if fps_cnt >= 100:
@@ -64,17 +64,17 @@ def main():
 
             for side in ("left", "right"):
                 ctrl = ArmCtrl()
-                ctrl.stamp = interface.get_timestamp()
+                ctrl.stamp = ros_interface.get_timestamp()
                 ctrl.ctrl_mode = ctrl_mode
                 ctrl.jnt_pos = [0.0, -1.5, 3.0, 0.07, 0.0, 0.0]
                 ctrl.mit_kp = [50.0] * 6
                 ctrl.mit_kd = [2.0] * 6
                 ctrl.lim_err = 0.02
-                interface.publish(arm_ctrl_pubs[side], ctrl)
+                ros_interface.publish(arm_ctrl_pubs[side], ctrl)
 
             _show_state(states, fps_info)
 
     except KeyboardInterrupt:
         pass
     finally:
-        interface.shutdown()
+        ros_interface.shutdown()

@@ -32,14 +32,14 @@ def _show_state(arm_state, grip_state, fps_info=""):
 
 
 def main():
-    interface = DataInterface("robot_firefly_y6_test", rate_hz=100.0)
+    ros_interface = DataInterface("robot_firefly_y6_test", rate_hz=100.0)
 
     # ============ parameter ============
-    interface.set_parameter("rate_hz", 100.0)
-    interface.set_parameter("arm_ctrl_mode", "pos")
+    ros_interface.set_parameter("rate_hz", 100.0)
+    ros_interface.set_parameter("arm_ctrl_mode", "pos")
 
-    ctrl_mode_name = interface.get_parameter("arm_ctrl_mode")
-    rate_hz = interface.get_parameter("rate_hz")
+    ctrl_mode_name = ros_interface.get_parameter("arm_ctrl_mode")
+    rate_hz = ros_interface.get_parameter("rate_hz")
 
     # ============ subscription ============
     arm_state = None
@@ -53,20 +53,20 @@ def main():
         nonlocal grip_state
         grip_state = msg
 
-    interface.create_subscription("arm_state", ArmState, arm_state_cb, 10)
-    interface.create_subscription("grip_state", GripState, grip_state_cb, 10)
+    ros_interface.create_subscription("arm_state", ArmState, arm_state_cb, 10)
+    ros_interface.create_subscription("grip_state", GripState, grip_state_cb, 10)
 
     # ============ publisher ============
-    arm_ctrl_pub = interface.create_publisher("arm_ctrl", ArmCtrl, 10)
+    arm_ctrl_pub = ros_interface.create_publisher("arm_ctrl", ArmCtrl, 10)
 
     ctrl_mode = _ARM_CTRL_MODES.get(ctrl_mode_name, ArmCtrlMode.POS)
 
-    interface.set_rate(rate_hz)
+    ros_interface.set_rate(rate_hz)
     fps_cnt, fps_start = 0, time.perf_counter_ns()
     fps_info = ""
     try:
-        while interface.ok():
-            interface.sleep()
+        while ros_interface.ok():
+            ros_interface.sleep()
 
             fps_cnt += 1
             if fps_cnt >= 100:
@@ -76,13 +76,13 @@ def main():
                 fps_start = now
 
             ctrl = ArmCtrl()
-            ctrl.stamp = interface.get_timestamp()
+            ctrl.stamp = ros_interface.get_timestamp()
             ctrl.ctrl_mode = ctrl_mode
             ctrl.jnt_pos = [0.0, -1.5, 3.0, 0.07, 0.0, 0.0]
             ctrl.mit_kp = [50.0] * 6
             ctrl.mit_kd = [2.0] * 6
             ctrl.lim_err = 0.02
-            interface.publish(arm_ctrl_pub, ctrl)
+            ros_interface.publish(arm_ctrl_pub, ctrl)
 
             current_arm = arm_state
             current_grip = grip_state
@@ -91,4 +91,4 @@ def main():
     except KeyboardInterrupt:
         pass
     finally:
-        interface.shutdown()
+        ros_interface.shutdown()

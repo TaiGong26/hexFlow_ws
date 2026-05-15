@@ -42,11 +42,11 @@ def _show_state(arm_state, grip_joy, fps_info=""):
 
 
 def main():
-    interface = DataInterface("robot_hello_y6_test", rate_hz=10.0)
+    ros_interface = DataInterface("robot_hello_y6_test", rate_hz=10.0)
 
     # ============ parameter ============
-    interface.set_parameter("rate_hz", 10.0)
-    rate_hz = interface.get_parameter("rate_hz")
+    ros_interface.set_parameter("rate_hz", 10.0)
+    rate_hz = ros_interface.get_parameter("rate_hz")
 
     # ============ subscription ============
     arm_state = None
@@ -60,18 +60,18 @@ def main():
         nonlocal grip_joy
         grip_joy = msg
 
-    interface.create_subscription("arm_state", ArmState, arm_state_cb, 10)
-    interface.create_subscription("grip_joy", Joy, grip_joy_cb, 10)
+    ros_interface.create_subscription("arm_state", ArmState, arm_state_cb, 10)
+    ros_interface.create_subscription("grip_joy", Joy, grip_joy_cb, 10)
 
     # ============ publisher ============
-    led_pub = interface.create_publisher("grip_led_ctrl", Int32MultiArray, 10)
+    led_pub = ros_interface.create_publisher("grip_led_ctrl", Int32MultiArray, 10)
 
-    interface.set_rate(rate_hz)
+    ros_interface.set_rate(rate_hz)
     fps_cnt, fps_start = 0, time.perf_counter_ns()
     fps_info = ""
     try:
-        while interface.ok():
-            interface.sleep()
+        while ros_interface.ok():
+            ros_interface.sleep()
 
             fps_cnt += 1
             if fps_cnt >= 1000:
@@ -82,7 +82,7 @@ def main():
 
             led_msg = Int32MultiArray()
             led_msg.data = _LED_CTRL_CMD["r"] + _LED_CTRL_CMD["g"] + _LED_CTRL_CMD["b"]
-            interface.publish(led_pub, led_msg)
+            ros_interface.publish(led_pub, led_msg)
 
             current_arm = arm_state
             current_grip = grip_joy
@@ -91,4 +91,4 @@ def main():
     except KeyboardInterrupt:
         pass
     finally:
-        interface.shutdown()
+        ros_interface.shutdown()
