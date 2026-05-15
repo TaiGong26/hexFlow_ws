@@ -60,29 +60,6 @@ def generate_launch_description():
         ],
     )
 
-    teleop_keyboard_node = Node(
-        package='hex_flow_ros_teleop',
-        executable='hex-teleop-keyboard',
-        name='teleop_keyboard',
-        output='screen',
-        emulate_tty=True,
-        condition=IfCondition(LaunchConfiguration('enable_keyboard')),
-        remappings=[
-            ('keyboard', '/teleop_keyboard/keyboard'),
-        ],
-    )
-
-    teleop_joystick_node = Node(
-        package='hex_flow_ros_teleop',
-        executable='hex-teleop-joystick',
-        name='teleop_joystick',
-        output='screen',
-        emulate_tty=True,
-        condition=IfCondition(LaunchConfiguration('enable_joystick')),
-        remappings=[
-            ('joy', '/teleop_joystick/joy'),
-        ],
-    )
 
     return LaunchDescription([
         headless,
@@ -91,6 +68,4 @@ def generate_launch_description():
         cam_buffer_size,
         sens_ts,
         sim_node,
-        teleop_keyboard_node,
-        teleop_joystick_node,
     ])
