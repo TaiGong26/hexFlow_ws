@@ -92,7 +92,7 @@ class InterfaceBase(ABC):
         pass
 
     @abstractmethod
-    def get_clocksource_timestamp(self, source: str = "ptp"):
+    def get_clocksource_timestamp(self, source: str = "driver_timestamp"):
         pass
 
     # ---- Buffered subscription (polling mode) ----

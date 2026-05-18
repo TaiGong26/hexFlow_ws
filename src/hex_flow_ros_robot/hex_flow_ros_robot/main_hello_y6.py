@@ -24,8 +24,8 @@ def main():
     ros_interface.set_parameter("sens_ts", False)
     # led_buffer_size: LED command buffer size → driver RGB LED control
     ros_interface.set_parameter("led_buffer_size", 10)
-    # clock_source: timestamp clock source for published messages (ptp or ros)
-    ros_interface.set_parameter("clock_source", "ptp")
+    # clock_source: timestamp clock source for published messages (driver_timestamp or ros)
+    ros_interface.set_parameter("clock_source", "driver_timestamp")
 
     params = HexRobotHelloY6Params(
         host=ros_interface.get_parameter("host"),
@@ -46,7 +46,7 @@ def main():
     def arm_state_cb(state):
         try:
             msg = ArmState()
-            msg.stamp = ros_interface.get_clocksource_timestamp(clock_source)
+            msg.stamp = ros_interface.get_clocksource_timestamp(clock_source,state["ts_ns"])
             msg.jnt_pos = state["jnt_pos"].tolist()
             msg.jnt_vel = state["jnt_vel"].tolist()
             # jnt_eff intentionally omitted — Zenoh reference does not publish it
@@ -57,7 +57,7 @@ def main():
     def grip_joy_cb(state):
         try:
             msg = Joy()
-            msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source)
+            msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source,state["ts_ns"])
             msg.axes = [
                 float(state["trigger"]),
                 float(state["axis_x"]),

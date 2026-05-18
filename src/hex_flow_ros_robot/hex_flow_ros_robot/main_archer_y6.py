@@ -27,8 +27,8 @@ def main():
     # pose_end_in_flange: end-effector pose relative to flange → driver kinematics
     ros_interface.set_parameter("pose_end_in_flange",
                             [0.187, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0])
-    # clock_source: timestamp clock source for published messages (ptp or ros)
-    ros_interface.set_parameter("clock_source", "ptp")
+    # clock_source: timestamp clock source for published messages (driver_timestamp or ros)
+    ros_interface.set_parameter("clock_source", "driver_timestamp")
 
     params = HexRobotArcherY6Params(
         host=ros_interface.get_parameter("host"),
@@ -52,7 +52,7 @@ def main():
     def arm_state_cb(state):
         try:
             msg = ArmState()
-            msg.stamp = ros_interface.get_clocksource_timestamp(clock_source)
+            msg.stamp = ros_interface.get_clocksource_timestamp(clock_source,state["ts_ns"])
             msg.jnt_pos = state["jnt_pos"].tolist()
             msg.jnt_vel = state["jnt_vel"].tolist()
             msg.jnt_eff = state["jnt_eff"].tolist()
@@ -65,7 +65,7 @@ def main():
     def grip_state_cb(state):
         try:
             msg = GripState()
-            msg.stamp = ros_interface.get_clocksource_timestamp(clock_source)
+            msg.stamp = ros_interface.get_clocksource_timestamp(clock_source,state["ts_ns"])
             msg.jnt_pos = state["jnt_pos"].tolist()
             msg.jnt_vel = state["jnt_vel"].tolist()
             msg.jnt_eff = state["jnt_eff"].tolist()

@@ -33,8 +33,8 @@ def main():
     ros_interface.set_parameter("left_cam_type", "empty")
     # right_cam_type: right arm camera type → driver camera config
     ros_interface.set_parameter("right_cam_type", "empty")
-    # clock_source: timestamp clock source for published messages (ptp or ros)
-    ros_interface.set_parameter("clock_source", "ptp")
+    # clock_source: timestamp clock source for published messages (driver_timestamp or ros)
+    ros_interface.set_parameter("clock_source", "driver_timestamp")
 
     params = HexMujocoE3DesktopParams(
         state_rate=ros_interface.get_parameter("state_rate"),
@@ -75,7 +75,7 @@ def main():
         def cb(state):
             try:
                 msg = ArmState()
-                msg.stamp = ros_interface.get_clocksource_timestamp(clock_source)
+                msg.stamp = ros_interface.get_clocksource_timestamp(clock_source,state["ts_ns"])
                 msg.jnt_pos = state["jnt_pos"].tolist()
                 msg.jnt_vel = state["jnt_vel"].tolist()
                 msg.jnt_eff = state["jnt_eff"].tolist()
@@ -90,7 +90,7 @@ def main():
         def cb(state):
             try:
                 msg = GripState()
-                msg.stamp = ros_interface.get_clocksource_timestamp(clock_source)
+                msg.stamp = ros_interface.get_clocksource_timestamp(clock_source,state["ts_ns"])
                 msg.jnt_pos = state["jnt_pos"].tolist()
                 msg.jnt_vel = state["jnt_vel"].tolist()
                 msg.jnt_eff = state["jnt_eff"].tolist()
@@ -102,7 +102,7 @@ def main():
     def obj_pose_cb(state):
         try:
             msg = PoseStamped()
-            msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source)
+            msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source,state["ts_ns"])
             msg.pose.position.x = float(state["pose_pos"][0])
             msg.pose.position.y = float(state["pose_pos"][1])
             msg.pose.position.z = float(state["pose_pos"][2])
@@ -118,7 +118,7 @@ def main():
         def cb(state):
             try:
                 msg = Image()
-                msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source)
+                msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source,state["ts_ns"])
                 msg.header.frame_id = f"camera_{cam}_optical_frame"
                 msg.height, msg.width = state["data"].shape[:2]
                 msg.encoding = "bgr8"
@@ -134,7 +134,7 @@ def main():
         def cb(state):
             try:
                 msg = Image()
-                msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source)
+                msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source,state["ts_ns"])
                 msg.header.frame_id = f"camera_{cam}_optical_frame"
                 msg.height, msg.width = state["data"].shape[:2]
                 msg.encoding = "mono16"

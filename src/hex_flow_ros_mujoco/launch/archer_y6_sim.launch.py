@@ -37,10 +37,22 @@ def generate_launch_description():
         description='Use device clock for timestamps.',
     )
 
+    cam_rate = DeclareLaunchArgument(
+        'cam_rate',
+        default_value='30.0',
+        description='Camera publish rate (Hz).',
+    )
+
+    camera_type = DeclareLaunchArgument(
+        'camera_type',
+        default_value='usb',
+        description='Camera type (empty/usb/realsense/berxel).',
+    )
+
     clock_source = DeclareLaunchArgument(
         'clock_source',
-        default_value='ptp',
-        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+        default_value='driver_timestamp',
+        description='Timestamp source: driver_timestamp (hardware clock) or ros (system clock).',
     )
 
     sim_node = Node(
@@ -55,8 +67,8 @@ def generate_launch_description():
             'state_buffer_size': LaunchConfiguration('state_buffer_size'),
             'cam_buffer_size': LaunchConfiguration('cam_buffer_size'),
             'sens_ts': LaunchConfiguration('sens_ts'),
-            'cam_rate': 30.0,
-            'camera_type': 'usb',
+            'cam_rate': LaunchConfiguration('cam_rate'),
+            'camera_type': LaunchConfiguration('camera_type'),
             'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
@@ -74,6 +86,8 @@ def generate_launch_description():
         state_buffer_size,
         cam_buffer_size,
         sens_ts,
+        cam_rate,
+        camera_type,
         clock_source,
         sim_node,
     ])

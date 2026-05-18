@@ -12,16 +12,16 @@ def generate_launch_description():
         description='Device path (empty=auto-detect).',
     )
 
-    xbox_view_test = DeclareLaunchArgument(
-        'xbox_view_test',
+    xbox_view_joy = DeclareLaunchArgument(
+        'xbox_view_joy',
         default_value='false',
         description='Enable debug output.',
     )
 
     clock_source = DeclareLaunchArgument(
         'clock_source',
-        default_value='ptp',
-        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+        default_value='driver_timestamp',
+        description='Timestamp source: driver_timestamp (hardware clock) or ros (system clock).',
     )
 
     joy_node = Node(
@@ -32,7 +32,7 @@ def generate_launch_description():
         emulate_tty=True,
         parameters=[{
             'device_path': LaunchConfiguration('device_path'),
-            'xbox_view_test': LaunchConfiguration('xbox_view_test'),
+            'xbox_view_joy': LaunchConfiguration('xbox_view_joy'),
             'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
@@ -42,7 +42,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         device_path,
-        xbox_view_test,
+        xbox_view_joy,
         clock_source,
         joy_node,
     ])

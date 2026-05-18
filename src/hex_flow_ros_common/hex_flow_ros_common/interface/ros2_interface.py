@@ -14,6 +14,7 @@ class DataInterface(InterfaceBase):
     def __init__(self, name: str, rate_hz: float = 100.0):
         super().__init__(name)
         rclpy.init()
+        self.__name = name
         self.__node = RosNode(name)
         self.__logger = self.__node.get_logger()
 
@@ -104,19 +105,24 @@ class DataInterface(InterfaceBase):
         return self.get_timestamp_from_s_ns(
             ns // 1_000_000_000, ns % 1_000_000_000)
 
-    def get_clocksource_timestamp(self, source: str = "ptp"):
+    def get_clocksource_timestamp(self, source: str = "driver_timestamp",ts: float = None):
         """
         Get timestamp from specified clock source.
 
         Args:
-            source: "ptp" for ns_now (Hex PTP clock), "ros" for rclpy Time
+            source: "driver_timestamp" for ns_now (Hex driver_timestamp clock), "ros" for rclpy Time
 
         Returns:
             Time message with nanoseconds from selected clock source
         """
-        if source == "ptp":
-            ns = ns_now()
+        if source == "driver_timestamp":
+            if ts == None:
+                ns = ns_now()
+                self.logw(f"[Node {self.__name}] get_clocksource_timestamp: ts is None, returning 0 timestamp")
+            else:
+                ns = ts
             return self.get_timestamp_from_ns(int(ns))
+        
         else:  # "ros"
             return self.get_timestamp()
 

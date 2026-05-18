@@ -169,9 +169,9 @@ class JoystickStateReader:
 def main():
     ros_interface = DataInterface("teleop_joystick", rate_hz=100.0)
     ros_interface.set_parameter("device_path", "")
-    ros_interface.set_parameter("xbox_view_test", False)
-    # clock_source: timestamp clock source for published messages (ptp or ros)
-    ros_interface.set_parameter("clock_source", "ptp")
+    ros_interface.set_parameter("xbox_view_joy", False)
+    # clock_source: timestamp clock source for published messages (driver_timestamp or ros)
+    ros_interface.set_parameter("clock_source", "driver_timestamp")
 
     device_path = ros_interface.get_parameter("device_path")
     if device_path:
@@ -192,7 +192,7 @@ def main():
     device = devices[0]
     reader = JoystickStateReader(device)
     reader.start()
-    reader.set_view(ros_interface.get_parameter("xbox_view_test"))
+    reader.set_view(ros_interface.get_parameter("xbox_view_joy"))
     try:
         while ros_interface.ok():
             ros_interface.sleep()

@@ -27,8 +27,8 @@ def main():
     ros_interface.set_parameter("temperature", 4000)
     # color_encoding: color image encoding format → driver encoding config
     ros_interface.set_parameter("color_encoding", "bgr8")
-    # clock_source: timestamp clock source for published messages (ptp or ros)
-    ros_interface.set_parameter("clock_source", "ptp")
+    # clock_source: timestamp clock source for published messages (driver_timestamp or ros)
+    ros_interface.set_parameter("clock_source", "driver_timestamp")
 
     params = HexCamUsbParams(
         frame_rate=ros_interface.get_parameter("frame_rate"),
@@ -50,7 +50,7 @@ def main():
     def color_cb(state):
         try:
             msg = Image()
-            msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source)
+            msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source,state["ts_ns"])
             msg.header.frame_id = "camera_color_optical_frame"
             msg.height, msg.width = state["data"].shape[:2]
             msg.encoding = color_encoding

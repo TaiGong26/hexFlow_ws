@@ -39,8 +39,8 @@ class HexFlowTemplateArcherY6:
         self.__ros_interface.set_parameter("arm_err_threshold", 0.02)
         # grip_err_threshold: max grip joint error for init/exit
         self.__ros_interface.set_parameter("grip_err_threshold", 0.02)
-        # clock_source: timestamp clock source for published messages (ptp or ros)
-        self.__ros_interface.set_parameter("clock_source", "ptp")
+        # clock_source: timestamp clock source for published messages (driver_timestamp or ros)
+        self.__ros_interface.set_parameter("clock_source", "driver_timestamp")
 
         self.__rate_hz = self.__ros_interface.get_parameter("rate_hz")
         self.__clock_source = self.__ros_interface.get_parameter("clock_source")

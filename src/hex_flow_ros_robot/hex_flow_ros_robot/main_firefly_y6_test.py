@@ -37,7 +37,7 @@ def main():
     # ============ parameter ============
     ros_interface.set_parameter("rate_hz", 100.0)
     ros_interface.set_parameter("arm_ctrl_mode", "pos")
-    ros_interface.set_parameter("clock_source", "ptp")
+    ros_interface.set_parameter("clock_source", "driver_timestamp")
 
     ctrl_mode_name = ros_interface.get_parameter("arm_ctrl_mode")
     rate_hz = ros_interface.get_parameter("rate_hz")

@@ -54,10 +54,16 @@ def generate_launch_description():
         description='Right arm camera type.',
     )
 
+    cam_rate = DeclareLaunchArgument(
+        'cam_rate',
+        default_value='30.0',
+        description='Camera publish rate (Hz).',
+    )
+
     clock_source = DeclareLaunchArgument(
         'clock_source',
-        default_value='ptp',
-        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+        default_value='driver_timestamp',
+        description='Timestamp source: driver_timestamp (hardware clock) or ros (system clock).',
     )
 
     sim_node = Node(
@@ -75,7 +81,7 @@ def generate_launch_description():
             'head_cam_type': LaunchConfiguration('head_cam_type'),
             'left_cam_type': LaunchConfiguration('left_cam_type'),
             'right_cam_type': LaunchConfiguration('right_cam_type'),
-            'cam_rate': 30.0,
+            'cam_rate': LaunchConfiguration('cam_rate'),
             'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
@@ -99,6 +105,7 @@ def generate_launch_description():
         head_cam,
         left_cam,
         right_cam,
+        cam_rate,
         clock_source,
         sim_node,
     ])

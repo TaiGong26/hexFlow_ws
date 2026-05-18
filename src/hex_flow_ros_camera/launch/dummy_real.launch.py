@@ -44,8 +44,8 @@ def generate_launch_description():
 
     clock_source = DeclareLaunchArgument(
         'clock_source',
-        default_value='ptp',
-        description='Clock source for timestamps: ptp (Hex PTP clock) or ros (rclpy Time).',
+        default_value='driver_timestamp',
+        description='Timestamp source: driver_timestamp (hardware clock) or ros (system clock).',
     )
 
     cam_node = Node(

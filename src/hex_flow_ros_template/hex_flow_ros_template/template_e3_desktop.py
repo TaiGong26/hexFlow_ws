@@ -32,7 +32,7 @@ class HexFlowTemplateE3Desktop:
         self.__ros_interface.set_parameter("arrive_threshold", 0.06)
         self.__ros_interface.set_parameter("arm_err_threshold", 0.02)
         self.__ros_interface.set_parameter("grip_err_threshold", 0.02)
-        self.__ros_interface.set_parameter("clock_source", "ptp")
+        self.__ros_interface.set_parameter("clock_source", "driver_timestamp")
 
         self.__rate_hz = self.__ros_interface.get_parameter("rate_hz")
         self.__clock_source = self.__ros_interface.get_parameter("clock_source")
