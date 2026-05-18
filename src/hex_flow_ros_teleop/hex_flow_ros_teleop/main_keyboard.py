@@ -94,7 +94,7 @@ def main():
             ros_interface.sleep()
             state = reader.get_state()
             msg = Joy()
-            msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source,state["ts_ns"])
+            msg.header.stamp = ros_interface.get_clocksource_timestamp(clock_source)
             msg.buttons = [state[name] for name in _LETTER_NAMES]
             ros_interface.publish(kb_pub, msg)
     except KeyboardInterrupt:

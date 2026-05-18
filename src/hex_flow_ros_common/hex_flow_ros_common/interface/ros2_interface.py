@@ -118,7 +118,6 @@ class DataInterface(InterfaceBase):
         if source == "driver_timestamp":
             if ts == None:
                 ns = ns_now()
-                self.logw(f"[Node {self.__name}] get_clocksource_timestamp: ts is None, returning 0 timestamp")
             else:
                 ns = ts
             return self.get_timestamp_from_ns(int(ns))
