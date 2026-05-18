@@ -28,13 +28,27 @@ def main():
     # clock_source: timestamp clock source for published messages (driver_timestamp or ros)
     ros_interface.set_parameter("clock_source", "driver_timestamp")
 
+    _sn = ros_interface.get_parameter("serial_number")
+    try:
+        if str(_sn).startswith("SN_"):
+            serial_number = str(_sn)[3:]
+        else:
+            serial_number = None  # auto select
+            ros_interface.logw("No serial number specified")
+            ros_interface.shutdown()
+            return
+    except (ValueError, TypeError):
+        ros_interface.loge(f"Invalid serial_number: {_sn}, expecting string or SN_ prefixed string")
+        ros_interface.shutdown()
+        return
+
     params = HexCamRealsenseParams(
         frame_rate=ros_interface.get_parameter("frame_rate"),
         height=ros_interface.get_parameter("height"),
         width=ros_interface.get_parameter("width"),
         cam_buffer_size=ros_interface.get_parameter("cam_buffer_size"),
         sens_ts=ros_interface.get_parameter("sens_ts"),
-        serial_number=str(ros_interface.get_parameter("serial_number")),
+        serial_number=serial_number,
     )
     color_encoding = ros_interface.get_parameter("color_encoding")
     depth_encoding = ros_interface.get_parameter("depth_encoding")

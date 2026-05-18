@@ -1,7 +1,75 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
+
+def launch_setup(context):
+    """在 OpaqueFunction 内部获取参数，并进行类型强转，确保传给节点的类型绝对正确"""
+    
+    # 1. 强制转为字符串：解决纯数字序列号变成整型的问题
+    serial_number = str(context.launch_configurations['serial_number'])
+    
+    # 2. 强制转为整型：保证即使传入字符串也能变成数字
+    frame_rate = int(context.launch_configurations['frame_rate'])
+    height = int(context.launch_configurations['height'])
+    width = int(context.launch_configurations['width'])
+    cam_buffer_size = int(context.launch_configurations['cam_buffer_size'])
+    
+    # 3. 强制转为布尔型：处理命令行传入 'true'/'false' 的情况
+    sens_ts_raw = context.launch_configurations['sens_ts']
+    if isinstance(sens_ts_raw, str):
+        sens_ts = sens_ts_raw.lower() in ['true', '1']
+    else:
+        sens_ts = bool(sens_ts_raw)
+
+    # 4. 正常的字符串参数（无需特殊处理）
+    color_encoding = context.launch_configurations['color_encoding']
+    depth_encoding = context.launch_configurations['depth_encoding']
+    clock_source = context.launch_configurations['clock_source']
+
+    cam_node = Node(
+        package='hex_flow_ros_camera',
+        executable='hex-cam-realsense',
+        name='cam_realsense',
+        output='screen',
+        emulate_tty=True,
+        parameters=[{
+            'frame_rate': frame_rate,
+            'height': height,
+            'width': width,
+            'cam_buffer_size': cam_buffer_size,
+            'sens_ts': sens_ts,
+            'serial_number': serial_number,  # 现在它一定是字符串了
+            'color_encoding': color_encoding,
+            'depth_encoding': depth_encoding,
+        }],
+        remappings=[
+            ('color', '/cam_realsense/color'),
+            ('depth', '/cam_realsense/depth'),
+        ],
+    )
+
+    test_node = Node(
+        package='hex_flow_ros_camera',
+        executable='hex-cam-realsense-test',
+        name='cam_realsense_test',
+        output='screen',
+        emulate_tty=True,
+        parameters=[{
+            'rate_hz': 30.0,
+            'cam_buffer_size': cam_buffer_size,
+            'sens_ts': sens_ts,
+            'color_encoding': color_encoding,
+            'clock_source': clock_source,
+        }],
+        remappings=[
+            ('color', '/cam_realsense/color'),
+            ('depth', '/cam_realsense/depth'),
+        ],
+    )
+
+    return [cam_node, test_node]
+
 
 
 def generate_launch_description():

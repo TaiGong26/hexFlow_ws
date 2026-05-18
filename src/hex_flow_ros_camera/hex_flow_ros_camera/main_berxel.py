@@ -20,7 +20,7 @@ def main():
     # sens_ts: clock source(true=device clock/false=system clock) → driver timestamp
     ros_interface.set_parameter("sens_ts", False)
     # serial_number: device serial number(empty=auto select) → driver device selection
-    ros_interface.set_parameter("serial_number", "0")
+    ros_interface.set_parameter("serial_number", "")
     # exposure: exposure value → driver camera exposure config
     ros_interface.set_parameter("exposure", 10000)
     # gain: gain value → driver camera gain config
@@ -31,6 +31,20 @@ def main():
     ros_interface.set_parameter("depth_encoding", "mono16")
     # clock_source: timestamp clock source for published messages (driver_timestamp or ros)
     ros_interface.set_parameter("clock_source", "driver_timestamp")
+        
+    _sn = ros_interface.get_parameter("serial_number")
+    try:
+        if str(_sn).startswith("SN_"):
+            serial_number = str(_sn)[3:]
+        else:
+            serial_number = None  # auto select
+            ros_interface.logw("No serial number specified")
+            ros_interface.shutdown()
+            return
+    except (ValueError, TypeError):
+        ros_interface.loge(f"Invalid serial_number: {_sn}, expecting string or SN_ prefixed string")
+        ros_interface.shutdown()
+        return
 
     params = HexCamBerxelParams(
         frame_rate=ros_interface.get_parameter("frame_rate"),
@@ -38,7 +52,7 @@ def main():
         width=ros_interface.get_parameter("width"),
         cam_buffer_size=ros_interface.get_parameter("cam_buffer_size"),
         sens_ts=ros_interface.get_parameter("sens_ts"),
-        serial_number=ros_interface.get_parameter("serial_number"),
+        serial_number=serial_number,
         exposure=ros_interface.get_parameter("exposure"),
         gain=ros_interface.get_parameter("gain"),
     )

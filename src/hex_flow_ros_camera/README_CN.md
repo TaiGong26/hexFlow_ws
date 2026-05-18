@@ -54,17 +54,17 @@ ros2 launch hex_flow_ros_camera berxel_real.launch.py
 ### 带参数的使用示例
 ```bash
 ros2 launch hex_flow_ros_camera usb_real.launch.py cam_path:=/dev/video0
-ros2 launch hex_flow_ros_camera realsense_real.launch.py serial_number:="'123456789'"
-ros2 launch hex_flow_ros_camera berxel_real.launch.py serial_number:="'123456789'"
+ros2 launch hex_flow_ros_camera realsense_real.launch.py serial_number:=SN_123456789
+ros2 launch hex_flow_ros_camera berxel_real.launch.py serial_number:=SN_123456789
 ```
 
-> **注意**：序列号（serial_number）为纯数字时需要用引号包裹，如 `"'123456789'""`。
+> **注意**：序列号必须以 `SN_` 为前缀（如 `SN_123456789`），内部会自动剥离前缀后传递给驱动。若无前缀则节点退出。
 
 ### test 示例
 ```bash
 ros2 launch hex_flow_ros_camera usb_test.launch.py cam_path:=/dev/video0
-ros2 launch hex_flow_ros_camera realsense_test.launch.py serial_number:="'123456789'"
-ros2 launch hex_flow_ros_camera berxel_test.launch.py serial_number:="'123456789'"
+ros2 launch hex_flow_ros_camera realsense_test.launch.py serial_number:=SN_123456789
+ros2 launch hex_flow_ros_camera berxel_test.launch.py serial_number:=SN_123456789
 ```
 
 ## 话题接口
@@ -124,7 +124,7 @@ ros2 launch hex_flow_ros_camera berxel_test.launch.py serial_number:="'123456789
 | temperature | 4000 | 颜色温度（白平衡） |
 | color_encoding | bgr8 | 彩色图像编码 |
 | clock_source | driver_timestamp | 时间戳时钟源：driver_timestamp 或 ros |
-| serial_number | '' | 设备序列号（空=自动检测） |
+| serial_number | '' | 设备序列号（必须为 `SN_` 前缀，空=自动检测） |
 | depth_encoding | mono16 | 深度图像编码 |
 | gain | 100 | 增益值（Berxel） |
 

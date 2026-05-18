@@ -54,17 +54,17 @@ ros2 launch hex_flow_ros_camera berxel_real.launch.py
 ### Usage with Parameters
 ```bash
 ros2 launch hex_flow_ros_camera usb_real.launch.py cam_path:=/dev/video0
-ros2 launch hex_flow_ros_camera realsense_real.launch.py serial_number:="'123456789'"
-ros2 launch hex_flow_ros_camera berxel_real.launch.py serial_number:="'123456789'"
+ros2 launch hex_flow_ros_camera realsense_real.launch.py serial_number:=SN_123456789
+ros2 launch hex_flow_ros_camera berxel_real.launch.py serial_number:=SN_123456789
 ```
 
-> **Note**: When the serial number (`serial_number`) is purely numeric, it must be wrapped in quotes, e.g., `"'123456789'"`.
+> **Note**: The serial number must be prefixed with `SN_` (e.g., `SN_123456789`). The prefix is stripped internally before passing to the driver. If no prefix is provided, the node will exit.
 
 ### test Examples
 ```bash
 ros2 launch hex_flow_ros_camera usb_test.launch.py cam_path:=/dev/video0
-ros2 launch hex_flow_ros_camera realsense_test.launch.py serial_number:="'123456789'"
-ros2 launch hex_flow_ros_camera berxel_test.launch.py serial_number:="'123456789'"
+ros2 launch hex_flow_ros_camera realsense_test.launch.py serial_number:=SN_123456789
+ros2 launch hex_flow_ros_camera berxel_test.launch.py serial_number:=SN_123456789
 ```
 
 ## Topic Interfaces
@@ -124,7 +124,7 @@ ros2 launch hex_flow_ros_camera berxel_test.launch.py serial_number:="'123456789
 | temperature | 4000 | Color temperature (white balance) |
 | color_encoding | bgr8 | Color image encoding |
 | clock_source | driver_timestamp | Timestamp clock source: driver_timestamp or ros |
-| serial_number | '' | Device serial number (empty=auto detect) |
+| serial_number | '' | Device serial number (must be `SN_` prefixed, empty=auto detect) |
 | depth_encoding | mono16 | Depth image encoding |
 | gain | 100 | Gain value (Berxel) |
 
