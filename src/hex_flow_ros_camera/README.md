@@ -58,7 +58,7 @@ ros2 launch hex_flow_ros_camera realsense_real.launch.py serial_number:=SN_12345
 ros2 launch hex_flow_ros_camera berxel_real.launch.py serial_number:=SN_123456789
 ```
 
-> **Note**: The serial number must be prefixed with `SN_` (e.g., `SN_123456789`). The prefix is stripped internally before passing to the driver. If no prefix is provided, the node will exit.
+> **Note**: The serial number must be provided with the `SN_` prefix (e.g., `SN_123456789`). If the prefix is missing, the node will exit.
 
 ### test Examples
 ```bash

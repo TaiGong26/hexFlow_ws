@@ -58,7 +58,7 @@ ros2 launch hex_flow_ros_camera realsense_real.launch.py serial_number:=SN_12345
 ros2 launch hex_flow_ros_camera berxel_real.launch.py serial_number:=SN_123456789
 ```
 
-> **注意**：序列号必须以 `SN_` 为前缀（如 `SN_123456789`），内部会自动剥离前缀后传递给驱动。若无前缀则节点退出。
+> **注意**：序列号必须带 `SN_` 前缀（如 `SN_123456789`）。若无前缀则节点退出。
 
 ### test 示例
 ```bash
