@@ -42,6 +42,8 @@ pip install 'evdev>=1.7.0' 'hex_util_runtime>=0.0.0,<0.1.0'
 
 ## 快速使用
 
+> **注意：** 如果你需要使用遥操作，那么应该先切换至 XBOX/XINPUT 模式。
+
 ### launch 命令示例
 ```bash
 ros2 launch hex_flow_ros_teleop joystick_test.launch.py
@@ -60,8 +62,8 @@ ros2 launch hex_flow_ros_teleop keyboard_test.launch.py device_path:=/dev/input/
 ### 发布话题
 | 名称 | 类型 | 描述 | 补充描述 |
 |------|------|------|---------|
-| `teleop_joy` | `sensor_msgs/Joy` | 游戏手柄状态 | buttons[10] + axes[8] |
-| `keyboard` | `sensor_msgs/Joy` | 键盘状态 | buttons[26] 对应 A-Z |
+| `teleop_joy` | `sensor_msgs/Joy` | 游戏手柄状态 | buttons[10] = 1(按下)/0(松开)，axes[8] 归一化到 [-1,1] |
+| `keyboard` | `sensor_msgs/Joy` | 键盘状态 | buttons[26] = 1(按下)/0(松开) 对应 A-Z |
 
 ### 游戏手柄按钮映射（teleop_joy.buttons）
 | Index | evdev Code | 描述 |

@@ -42,6 +42,8 @@ pip install 'evdev>=1.7.0' 'hex_util_runtime>=0.0.0,<0.1.0'
 
 ## Quick Start
 
+> **Note:** If you need to use joystick teleoperation, you should first switch to XBOX/XINPUT mode.
+
 ### Launch Command Examples
 ```bash
 ros2 launch hex_flow_ros_teleop joystick_test.launch.py
@@ -60,8 +62,8 @@ ros2 launch hex_flow_ros_teleop keyboard_test.launch.py device_path:=/dev/input/
 ### Published Topics
 | Name | Type | Description | Additional Info |
 |------|------|-------------|-----------------|
-| `teleop_joy` | `sensor_msgs/Joy` | Joystick state | buttons[10] + axes[8] |
-| `keyboard` | `sensor_msgs/Joy` | Keyboard state | buttons[26] corresponding to A-Z |
+| `teleop_joy` | `sensor_msgs/Joy` | Joystick state | buttons[10] = 1(pressed)/0(released), axes[8] normalized to [-1,1] |
+| `keyboard` | `sensor_msgs/Joy` | Keyboard state | buttons[26] = 1(pressed)/0(released) corresponding to A-Z |
 
 ### Joystick Button Mapping (teleop_joy.buttons)
 | Index | evdev Code | Description |
