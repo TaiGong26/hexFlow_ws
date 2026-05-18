@@ -3,7 +3,7 @@
   <name>hex_flow_ros_msg</name>
   <version>0.0.1</version>
   <description>HexFlow custom ROS 2 message definitions</description>
-  <maintainer email="847235539@qq.com">Dong Zhaorui</maintainer>
+  <maintainer email="thetaigon@qq.com">taigong26</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

@@ -10,7 +10,6 @@
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>hex_flow_ros_common</exec_depend>
   <exec_depend>hex_flow_ros_msg</exec_depend>
-  <exec_depend>evdev</exec_depend>
 
   <export>
     <build_type>ament_python</build_type>

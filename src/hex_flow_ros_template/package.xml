@@ -3,7 +3,7 @@
   <name>hex_flow_ros_template</name>
   <version>0.0.1</version>
   <description>HexFlow ROS2 application template package (Archer Y6 + E3 Desktop)</description>
-  <maintainer email="847235539@qq.com">Dong Zhaorui</maintainer>
+  <maintainer email="thetaigon@qq.com">taigong26</maintainer>
   <license>Apache-2.0</license>
 
   <exec_depend>rclpy</exec_depend>
