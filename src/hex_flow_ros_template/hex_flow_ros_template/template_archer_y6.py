@@ -255,7 +255,6 @@ class HexFlowTemplateArcherY6:
         self.__stop_event.set()
         self.__teleop_thread.join(timeout=2.0)
         self.__exit_process()
-        self.__ros_interface.shutdown()
         self.__ros_interface.logi("Arm homed, ready to exit.")
+        self.__ros_interface.shutdown()
         
-        pass

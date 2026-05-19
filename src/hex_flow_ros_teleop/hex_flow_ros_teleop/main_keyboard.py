@@ -32,6 +32,7 @@ class KeyboardStateReader:
         self._state = {name: 0 for name in _LETTER_NAMES}
         self._lock = threading.Lock()
         self._running = False
+        self._tasks = []
 
     def start(self):
         self._running = True
@@ -39,9 +40,12 @@ class KeyboardStateReader:
             t = threading.Thread(target=self._read_loop,
                                  args=(dev,), daemon=True)
             t.start()
+            self._tasks.append(t)
 
     def stop(self):
         self._running = False
+        for t in self._tasks:
+            t.join()
 
     def _read_loop(self, dev):
         while self._running:
@@ -99,6 +103,6 @@ def main():
             ros_interface.publish(kb_pub, msg)
     except KeyboardInterrupt:
         pass
-    finally:
+    if reader:
         reader.stop()
-        ros_interface.shutdown()
+    ros_interface.shutdown()

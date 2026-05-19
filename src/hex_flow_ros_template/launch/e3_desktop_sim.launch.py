@@ -1,6 +1,8 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, RegisterEventHandler, EmitEvent
+from launch.event_handlers import OnProcessExit
+from launch.events import Shutdown
 from launch.substitutions import LaunchConfiguration
 
 
@@ -68,4 +70,15 @@ def generate_launch_description():
         ],
     )
 
-    return LaunchDescription([clock_source, sim_node, teleop_node, template_node])
+    return LaunchDescription([
+        clock_source,
+        sim_node,
+        teleop_node,
+        template_node,
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=template_node,
+                on_exit=[EmitEvent(event=Shutdown(reason='Template node exited'))]
+            )
+        ),
+    ])
