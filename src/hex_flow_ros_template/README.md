@@ -32,7 +32,7 @@ git clone https://github.com/hexfellow/hex_flow_ros_template.git
 
 ### pip Installation
 ```bash
-pip install 'numpy>=2.2.6' 'hex_util_runtime>=0.0.0,<0.1.0'
+pip install 'numpy>=2.2.6' 'hex_util_runtime>=0.0.0,<0.1.0' 'evdev>=1.7.0' 'hex_driver_robot>=0.1.0,<0.2.0' 'hex_driver_mujoco>=0.1.0,<0.2.0'
 ```
 
 ## Quick Start
