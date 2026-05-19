@@ -27,6 +27,9 @@
 ```https://github.com/IntelRealSense/librealsense```
 > You need to install the appropriate realsense dependencies according to your device.
 
+### Berxel SDK
+> For Berxel cameras, you need to install the vendor SDK `berxel_py_wrapper>=2.0.182`.
+
 ### ROS2 Dependencies
 ```bash
 git clone https://github.com/hexfellow/hex_flow_ros_common.git
@@ -36,7 +39,7 @@ git clone https://github.com/hexfellow/hex_flow_ros_camera.git
 
 ### pip Installation
 ```bash
-pip install 'opencv-python>=4.10.0' 'numpy>=2.2.6' 'hex_driver_camera>=0.1.0,<0.2.0' 'hex_util_robot>=0.0.0,<0.1.0' 'cv-bridge' 'pyrealsense2'
+pip install 'opencv-python>=4.10.0' 'numpy>=2.2.6' 'hex_driver_camera>=0.1.0,<0.2.0' 'hex_util_robot>=0.0.0,<0.1.0' 'cv-bridge' 'pyrealsense2' 'berxel_py_wrapper>=2.0.182'
 ```
 
 > `cv_bridge` is only used in test nodes.
@@ -47,18 +50,15 @@ pip install 'opencv-python>=4.10.0' 'numpy>=2.2.6' 'hex_driver_camera>=0.1.0,<0.
 ```bash
 ros2 launch hex_flow_ros_camera usb_real.launch.py
 ros2 launch hex_flow_ros_camera dummy_real.launch.py
-ros2 launch hex_flow_ros_camera realsense_real.launch.py
-ros2 launch hex_flow_ros_camera berxel_real.launch.py
-```
-
-### Usage with Parameters
-```bash
-ros2 launch hex_flow_ros_camera usb_real.launch.py cam_path:=/dev/video0
 ros2 launch hex_flow_ros_camera realsense_real.launch.py serial_number:=SN_123456789
 ros2 launch hex_flow_ros_camera berxel_real.launch.py serial_number:=SN_123456789
+
+# Override device path for USB camera
+ros2 launch hex_flow_ros_camera usb_real.launch.py cam_path:=/dev/video0
 ```
 
-> **Note**: The serial number must be provided with the `SN_` prefix (e.g., `SN_123456789`). If the prefix is missing, the node will exit.
+> **Note**: The serial number must be provided with the `SN_` prefix (e.g., `SN_123456789`). If the prefix is missing, the node will exit.      \
+> For USB cameras, ensure your user group has access to the device (e.g., check `ls -l /dev/video0` and `groups`).
 
 ### test Examples
 ```bash
@@ -108,8 +108,6 @@ ros2 launch hex_flow_ros_camera berxel_test.launch.py serial_number:=SN_12345678
 | `realsense_test.launch.py` | RealSense driver + test |
 | `berxel_real.launch.py` | Berxel driver |
 | `berxel_test.launch.py` | Berxel driver + test |
-
-> **Note**: The `serial_number` parameter is required for RealSense and Berxel cameras to specify the device serial number.
 
 ### Parameter Description
 | Parameter | Default Value | Description |

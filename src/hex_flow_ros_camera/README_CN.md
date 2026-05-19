@@ -27,6 +27,9 @@
 ```https://github.com/IntelRealSense/librealsense```
 > 您需要根据您的设备安装指定的realsense依赖
 
+### Berxel SDK
+> 对于 Berxel 相机，您需要安装厂商 SDK `berxel_py_wrapper>=2.0.182`。
+
 ### ROS2 依赖
 ```bash
 git clone https://github.com/hexfellow/hex_flow_ros_common.git
@@ -36,7 +39,7 @@ git clone https://github.com/hexfellow/hex_flow_ros_camera.git
 
 ### pip 安装
 ```bash
-pip install 'opencv-python>=4.10.0' 'numpy>=2.2.6' 'hex_driver_camera>=0.1.0,<0.2.0' 'hex_util_robot>=0.0.0,<0.1.0' 'cv-bridge' 'pyrealsense2'
+pip install 'opencv-python>=4.10.0' 'numpy>=2.2.6' 'hex_driver_camera>=0.1.0,<0.2.0' 'hex_util_robot>=0.0.0,<0.1.0' 'cv-bridge' 'pyrealsense2' 'berxel_py_wrapper>=2.0.182'
 ```
 
 > `cv_bridge` 仅在 test 节点中使用。
@@ -47,18 +50,15 @@ pip install 'opencv-python>=4.10.0' 'numpy>=2.2.6' 'hex_driver_camera>=0.1.0,<0.
 ```bash
 ros2 launch hex_flow_ros_camera usb_real.launch.py
 ros2 launch hex_flow_ros_camera dummy_real.launch.py
-ros2 launch hex_flow_ros_camera realsense_real.launch.py
-ros2 launch hex_flow_ros_camera berxel_real.launch.py
-```
-
-### 带参数的使用示例
-```bash
-ros2 launch hex_flow_ros_camera usb_real.launch.py cam_path:=/dev/video0
 ros2 launch hex_flow_ros_camera realsense_real.launch.py serial_number:=SN_123456789
 ros2 launch hex_flow_ros_camera berxel_real.launch.py serial_number:=SN_123456789
+
+# 覆盖 USB 相机的设备路径
+ros2 launch hex_flow_ros_camera usb_real.launch.py cam_path:=/dev/video0
 ```
 
-> **注意**：序列号必须带 `SN_` 前缀（如 `SN_123456789`）。若无前缀则节点退出。
+> **注意**：序列号必须带 `SN_` 前缀（如 `SN_123456789`）。若无前缀则节点退出。 \
+> 对于 USB 相机，请确保当前用户组有设备访问权限（例如检查 `ls -l /dev/video0` 和 `groups`）。
 
 ### test 示例
 ```bash
@@ -108,8 +108,6 @@ ros2 launch hex_flow_ros_camera berxel_test.launch.py serial_number:=SN_12345678
 | `realsense_test.launch.py` | RealSense 驱动 + 测试 |
 | `berxel_real.launch.py` | Berxel 驱动 |
 | `berxel_test.launch.py` | Berxel 驱动 + 测试 |
-
-> **注意**：`serial_number` 参数对于 RealSense 和 Berxel 相机为必填项，用于指定设备序列号。
 
 ### 参数说明
 | 参数 | 默认值 | 描述 |
