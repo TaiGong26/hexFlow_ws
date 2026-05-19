@@ -8,6 +8,22 @@ from hex_flow_ros_msg.msg import ArmState, ArmCtrl, GripState, GripCtrl
 from sensor_msgs.msg import Joy
 from hex_util_runtime import HexRate
 
+_ARM_HOME_CFG = {
+    "stable_pos": [0.0, -1.5, 3.0, 0.07, 0.0, 0.0],
+    "kp": [200.0, 200.0, 250.0, 150.0, 100.0, 100.0],
+    "kd": [5.0, 5.0, 5.0, 5.0, 2.0, 2.0],
+    "lim_err": 0.02,
+    "arrive_threshold": 0.06,
+}
+
+_GRIP_HOME_CFG = {
+    "stable_pos": [0.5],
+    "kp": [10.0],
+    "kd": [0.5],
+    "lim_err": 0.02,
+    "arrive_threshold": 0.06,
+}
+
 class HexFlowTemplateArcherY6:
 
     def __init__(self, name="template_archer_y6"):
@@ -15,53 +31,25 @@ class HexFlowTemplateArcherY6:
         self.__ros_interface = DataInterface(name, rate_hz=500.0)
         self.__stop_event = threading.Event()
 
-        self.__init_params()
+        self.__load_config()
         self.__init_subs()
         self.__init_pubs()
 
-    def __init_params(self):
-        # rate_hz: template control loop rate
+    def __load_config(self):
         self.__ros_interface.set_parameter("rate_hz", 500.0)
-        # arm_stable_pos: 6-DOF stable joint position for init/exit
-        self.__ros_interface.set_parameter("arm_stable_pos",
-                                        [0.0, -1.5, 3.0, 0.07, 0.0, 0.0])
-        # grip_stable_pos: 1-DOF stable grip position
-        self.__ros_interface.set_parameter("grip_stable_pos", [0.5])
-        # arm_kp/arm_kd: MIT mode stiffness/damping for arm
-        self.__ros_interface.set_parameter("arm_kp", [50.0] * 6)
-        self.__ros_interface.set_parameter("arm_kd", [2.0] * 6)
-        # grip_kp/grip_kd: MIT mode stiffness/damping for grip
-        self.__ros_interface.set_parameter("grip_kp", [10.0])
-        self.__ros_interface.set_parameter("grip_kd", [1.0])
-        # arrive_threshold: max error to consider position as arrived
-        self.__ros_interface.set_parameter("arrive_threshold", 0.06)
-        # arm_err_threshold: max arm joint error for init/exit
-        self.__ros_interface.set_parameter("arm_err_threshold", 0.02)
-        # grip_err_threshold: max grip joint error for init/exit
-        self.__ros_interface.set_parameter("grip_err_threshold", 0.02)
-        # clock_source: timestamp clock source for published messages (driver_timestamp or ros)
         self.__ros_interface.set_parameter("clock_source", "driver_timestamp")
 
         self.__rate_hz = self.__ros_interface.get_parameter("rate_hz")
         self.__clock_source = self.__ros_interface.get_parameter("clock_source")
-        self.__arm_stable_pos = np.array(
-            self.__ros_interface.get_parameter("arm_stable_pos"), dtype=np.float64)
-        self.__grip_stable_pos = np.array(
-            self.__ros_interface.get_parameter("grip_stable_pos"), dtype=np.float64)
-        self.__arm_kp = np.array(
-            self.__ros_interface.get_parameter("arm_kp"), dtype=np.float64)
-        self.__arm_kd = np.array(
-            self.__ros_interface.get_parameter("arm_kd"), dtype=np.float64)
-        self.__grip_kp = np.array(
-            self.__ros_interface.get_parameter("grip_kp"), dtype=np.float64)
-        self.__grip_kd = np.array(
-            self.__ros_interface.get_parameter("grip_kd"), dtype=np.float64)
-        self.__arrive_threshold = self.__ros_interface.get_parameter(
-            "arrive_threshold")
-        self.__arm_err_threshold = self.__ros_interface.get_parameter(
-            "arm_err_threshold")
-        self.__grip_err_threshold = self.__ros_interface.get_parameter(
-            "grip_err_threshold")
+        self.__arm_stable_pos = np.array(_ARM_HOME_CFG["stable_pos"], dtype=np.float64)
+        self.__grip_stable_pos = np.array(_GRIP_HOME_CFG["stable_pos"], dtype=np.float64)
+        self.__arm_kp = np.array(_ARM_HOME_CFG["kp"], dtype=np.float64)
+        self.__arm_kd = np.array(_ARM_HOME_CFG["kd"], dtype=np.float64)
+        self.__grip_kp = np.array(_GRIP_HOME_CFG["kp"], dtype=np.float64)
+        self.__grip_kd = np.array(_GRIP_HOME_CFG["kd"], dtype=np.float64)
+        self.__arrive_threshold = _ARM_HOME_CFG["arrive_threshold"]
+        self.__arm_err_threshold = _ARM_HOME_CFG["lim_err"]
+        self.__grip_err_threshold = _GRIP_HOME_CFG["lim_err"]
 
     def __init_subs(self):
         self.__ros_interface.create_subscription_buffered(

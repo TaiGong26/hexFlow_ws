@@ -7,6 +7,21 @@ from hex_flow_ros_common.ctrl_mode import ArmCtrlMode, GripCtrlMode
 from hex_flow_ros_msg.msg import ArmState, ArmCtrl, GripState, GripCtrl
 from sensor_msgs.msg import Joy
 
+_ARM_HOME_CFG = {
+    "stable_pos": [0.0, -1.5, 3.0, 0.07, 0.0, 0.0],
+    "kp": [200.0, 200.0, 250.0, 150.0, 100.0, 100.0],
+    "kd": [5.0, 5.0, 5.0, 5.0, 2.0, 2.0],
+    "lim_err": 0.02,
+    "arrive_threshold": 0.06,
+}
+
+_GRIP_HOME_CFG = {
+    "stable_pos": [0.5],
+    "kp": [10.0],
+    "kd": [0.5],
+    "lim_err": 0.02,
+    "arrive_threshold": 0.06,
+}
 
 class HexFlowTemplateE3Desktop:
 
@@ -16,44 +31,25 @@ class HexFlowTemplateE3Desktop:
         self.__stop_event = threading.Event()
         self.__sides = ("left", "right")
 
-        self.__init_params()
+        self.__load_config()
         self.__init_subs()
         self.__init_pubs()
 
-    def __init_params(self):
+    def __load_config(self):
         self.__ros_interface.set_parameter("rate_hz", 500.0)
-        self.__ros_interface.set_parameter("arm_stable_pos",
-                                        [0.0, -1.5, 3.0, 0.07, 0.0, 0.0])
-        self.__ros_interface.set_parameter("grip_stable_pos", [0.5])
-        self.__ros_interface.set_parameter("arm_kp", [50.0] * 6)
-        self.__ros_interface.set_parameter("arm_kd", [2.0] * 6)
-        self.__ros_interface.set_parameter("grip_kp", [10.0])
-        self.__ros_interface.set_parameter("grip_kd", [1.0])
-        self.__ros_interface.set_parameter("arrive_threshold", 0.06)
-        self.__ros_interface.set_parameter("arm_err_threshold", 0.02)
-        self.__ros_interface.set_parameter("grip_err_threshold", 0.02)
         self.__ros_interface.set_parameter("clock_source", "driver_timestamp")
 
         self.__rate_hz = self.__ros_interface.get_parameter("rate_hz")
         self.__clock_source = self.__ros_interface.get_parameter("clock_source")
-        self.__arm_stable_pos = np.array(
-            self.__ros_interface.get_parameter("arm_stable_pos"), dtype=np.float64)
-        self.__grip_stable_pos = np.array(
-            self.__ros_interface.get_parameter("grip_stable_pos"), dtype=np.float64)
-        self.__arm_kp = np.array(
-            self.__ros_interface.get_parameter("arm_kp"), dtype=np.float64)
-        self.__arm_kd = np.array(
-            self.__ros_interface.get_parameter("arm_kd"), dtype=np.float64)
-        self.__grip_kp = np.array(
-            self.__ros_interface.get_parameter("grip_kp"), dtype=np.float64)
-        self.__grip_kd = np.array(
-            self.__ros_interface.get_parameter("grip_kd"), dtype=np.float64)
-        self.__arrive_threshold = self.__ros_interface.get_parameter(
-            "arrive_threshold")
-        self.__arm_err_threshold = self.__ros_interface.get_parameter(
-            "arm_err_threshold")
-        self.__grip_err_threshold = self.__ros_interface.get_parameter(
-            "grip_err_threshold")
+        self.__arm_stable_pos = np.array(_ARM_HOME_CFG["stable_pos"], dtype=np.float64)
+        self.__grip_stable_pos = np.array(_GRIP_HOME_CFG["stable_pos"], dtype=np.float64)
+        self.__arm_kp = np.array(_ARM_HOME_CFG["kp"], dtype=np.float64)
+        self.__arm_kd = np.array(_ARM_HOME_CFG["kd"], dtype=np.float64)
+        self.__grip_kp = np.array(_GRIP_HOME_CFG["kp"], dtype=np.float64)
+        self.__grip_kd = np.array(_GRIP_HOME_CFG["kd"], dtype=np.float64)
+        self.__arrive_threshold = _ARM_HOME_CFG["arrive_threshold"]
+        self.__arm_err_threshold = _ARM_HOME_CFG["lim_err"]
+        self.__grip_err_threshold = _GRIP_HOME_CFG["lim_err"]
 
     def __init_subs(self):
         for side in self.__sides:

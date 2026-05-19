@@ -4,6 +4,7 @@ import traceback
 import numpy as np
 from hex_flow_ros_common.interface import DataInterface
 from hex_flow_ros_common.ctrl_mode import ArmCtrlMode
+from hex_flow_ros_common.arm_config import ARM_CTRL_GAINS
 from hex_flow_ros_common.msg_convert import ros_ctrl_to_driver_cmd
 from hex_flow_ros_msg.msg import ArmState, ArmCtrl, GripState
 
@@ -51,7 +52,7 @@ def main():
     arm_ctrl_pub = ros_interface.create_publisher("arm_ctrl", ArmCtrl, 10)
 
     ctrl_mode = _ARM_CTRL_MODES.get(ctrl_mode_name, ArmCtrlMode.POS)
-
+    arm_config = ARM_CTRL_GAINS.get(ctrl_mode, ARM_CTRL_GAINS[ArmCtrlMode.COMP])
     ros_interface.set_rate(rate_hz)
     fps_cnt, fps_start = 0, time.perf_counter_ns()
     fps_info = ""
@@ -70,9 +71,9 @@ def main():
             ctrl.stamp = ros_interface.get_clocksource_timestamp(clock_source)
             ctrl.ctrl_mode = ctrl_mode
             ctrl.jnt_pos = [0.0, -1.5, 3.0, 0.07, 0.0, 0.0]
-            ctrl.mit_kp = [50.0] * 6
-            ctrl.mit_kd = [2.0] * 6
-            ctrl.lim_err = 0.02
+            ctrl.mit_kp = arm_config["mit_kp"]
+            ctrl.mit_kd = arm_config["mit_kd"]
+            ctrl.lim_err = arm_config.get("lim_err", 0.0)
             ros_interface.publish(arm_ctrl_pub, ctrl)
 
             current = arm_state
