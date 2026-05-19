@@ -30,11 +30,6 @@ git clone https://github.com/hexfellow/hex_flow_ros_msg.git
 git clone https://github.com/hexfellow/hex_flow_ros_teleop.git
 ```
 
-### 系统依赖
-```bash
-sudo apt install python3-evdev
-```
-
 ### pip 安装
 ```bash
 pip install 'evdev>=1.7.0' 'hex_util_runtime>=0.0.0,<0.1.0'
@@ -42,20 +37,15 @@ pip install 'evdev>=1.7.0' 'hex_util_runtime>=0.0.0,<0.1.0'
 
 ## 快速使用
 
-> **注意：** 如果你需要使用遥操作，那么应该先切换至 XBOX/XINPUT 模式。
+> **注意：** 如果你需要使用遥操作，那么应该先切换至 XBOX/XINPUT 模式。  \
+> 请确保当前用户组有设备访问权限（例如检查 `ls -l /dev/input/event*` 和 `groups`）。
 
 ### launch 命令示例
 ```bash
-ros2 launch hex_flow_ros_teleop joystick_test.launch.py
-ros2 launch hex_flow_ros_teleop keyboard_test.launch.py
+ros2 launch hex_flow_ros_teleop joystick_test.launch.py device_path:=/dev/input/event3
+ros2 launch hex_flow_ros_teleop keyboard_test.launch.py device_path:=/dev/input/event4  
 ```
 > 不提供参数时默认会自动获取路径
-
-### 带参数的使用示例
-```bash
-ros2 launch hex_flow_ros_teleop joystick_test.launch.py device_path:=/dev/input/event3
-ros2 launch hex_flow_ros_teleop keyboard_test.launch.py device_path:=/dev/input/event4
-```
 
 ## 话题接口
 

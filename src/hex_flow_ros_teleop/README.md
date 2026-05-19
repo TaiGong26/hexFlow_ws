@@ -30,11 +30,6 @@ git clone https://github.com/hexfellow/hex_flow_ros_msg.git
 git clone https://github.com/hexfellow/hex_flow_ros_teleop.git
 ```
 
-### System Dependencies
-```bash
-sudo apt install python3-evdev
-```
-
 ### pip Installation
 ```bash
 pip install 'evdev>=1.7.0' 'hex_util_runtime>=0.0.0,<0.1.0'
@@ -42,20 +37,14 @@ pip install 'evdev>=1.7.0' 'hex_util_runtime>=0.0.0,<0.1.0'
 
 ## Quick Start
 
-> **Note:** If you need to use joystick teleoperation, you should first switch to XBOX/XINPUT mode.
+> **Note:** If you need to use joystick teleoperation, you should first switch to XBOX/XINPUT mode. Ensure your user group has access to the device (e.g., check `ls -l /dev/input/event*` and `groups`).
 
 ### Launch Command Examples
 ```bash
-ros2 launch hex_flow_ros_teleop joystick_test.launch.py
-ros2 launch hex_flow_ros_teleop keyboard_test.launch.py
+ros2 launch hex_flow_ros_teleop joystick_test.launch.py device_path:=/dev/input/event3
+ros2 launch hex_flow_ros_teleop keyboard_test.launch.py device_path:=/dev/input/event4  
 ```
 > When no parameters are provided, the device path is automatically detected by default.
-
-### Usage Examples with Parameters
-```bash
-ros2 launch hex_flow_ros_teleop joystick_test.launch.py device_path:=/dev/input/event3
-ros2 launch hex_flow_ros_teleop keyboard_test.launch.py device_path:=/dev/input/event4
-```
 
 ## Topic Interfaces
 

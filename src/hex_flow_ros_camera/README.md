@@ -48,13 +48,10 @@ pip install 'opencv-python>=4.10.0' 'numpy>=2.2.6' 'hex_driver_camera>=0.1.0,<0.
 
 ### launch Command Examples
 ```bash
-ros2 launch hex_flow_ros_camera usb_real.launch.py
 ros2 launch hex_flow_ros_camera dummy_real.launch.py
 ros2 launch hex_flow_ros_camera realsense_real.launch.py serial_number:=SN_123456789
 ros2 launch hex_flow_ros_camera berxel_real.launch.py serial_number:=SN_123456789
-
-# Override device path for USB camera
-ros2 launch hex_flow_ros_camera usb_real.launch.py cam_path:=/dev/video0
+ros2 launch hex_flow_ros_camera usb_real.launch.py cam_path:=/dev/video0  # default: /dev/video0
 ```
 
 > **Note**: The serial number must be provided with the `SN_` prefix (e.g., `SN_123456789`). If the prefix is missing, the node will exit.      \

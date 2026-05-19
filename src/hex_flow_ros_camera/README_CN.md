@@ -48,13 +48,10 @@ pip install 'opencv-python>=4.10.0' 'numpy>=2.2.6' 'hex_driver_camera>=0.1.0,<0.
 
 ### launch 命令示例
 ```bash
-ros2 launch hex_flow_ros_camera usb_real.launch.py
 ros2 launch hex_flow_ros_camera dummy_real.launch.py
 ros2 launch hex_flow_ros_camera realsense_real.launch.py serial_number:=SN_123456789
 ros2 launch hex_flow_ros_camera berxel_real.launch.py serial_number:=SN_123456789
-
-# 覆盖 USB 相机的设备路径
-ros2 launch hex_flow_ros_camera usb_real.launch.py cam_path:=/dev/video0
+ros2 launch hex_flow_ros_camera usb_real.launch.py cam_path:=/dev/video0  # 默认: /dev/video0
 ```
 
 > **注意**：序列号必须带 `SN_` 前缀（如 `SN_123456789`）。若无前缀则节点退出。 \
