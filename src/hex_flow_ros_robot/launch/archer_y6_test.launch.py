@@ -10,6 +10,11 @@ def generate_launch_description():
         default_value='0.0.0.0',
         description='Robot controller IP address.',
     )
+    port = DeclareLaunchArgument(
+        'port',
+        default_value='8439',
+        description='Robot controller port.',
+    )
 
     clock_source = DeclareLaunchArgument(
         'clock_source',
@@ -25,7 +30,7 @@ def generate_launch_description():
         emulate_tty=True,
         parameters=[{
             'host': LaunchConfiguration('host'),
-            'port': 8439,
+            'port': LaunchConfiguration('port'),
             'clock_source': LaunchConfiguration('clock_source'),
         }],
         remappings=[
@@ -52,6 +57,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         host,
+        port,
         clock_source,
         robot_node,
         test_node
