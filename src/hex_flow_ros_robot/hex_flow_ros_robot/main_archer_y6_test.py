@@ -9,6 +9,7 @@ from hex_flow_ros_common.msg_convert import ros_ctrl_to_driver_cmd
 from hex_flow_ros_msg.msg import ArmState, ArmCtrl, GripState
 
 
+
 _ARM_CTRL_MODES = {
     "pos": ArmCtrlMode.POS,
     "mit": ArmCtrlMode.MIT,
@@ -33,7 +34,7 @@ def _show_state(arm_state, grip_state, fps_info=""):
 
 
 def main():
-    ros_interface = DataInterface("robot_archer_y6_test", rate_hz=1000.0)
+    ros_interface = DataInterface("robot_archer_y6_test", rate_hz=500.0)
 
     # ============ parameter ============
     ros_interface.set_parameter("rate_hz", 500.0)

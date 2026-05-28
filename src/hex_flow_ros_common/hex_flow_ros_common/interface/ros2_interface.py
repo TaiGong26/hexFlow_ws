@@ -73,8 +73,17 @@ class DataInterface(InterfaceBase):
 
     def shutdown(self):
         self.__node.destroy_node()
-        if self.ok():
-            rclpy.shutdown()    
+        
+        if self.__spin_thread.is_alive():
+            self.__spin_thread.join(timeout=2.0)
+        
+        try:
+            if rclpy.ok():
+                rclpy.shutdown()
+        except Exception as e:
+            self.__logger.error(f"[Node {self.__name}] Error: {e}")
+            
+        
 
     # ---- Logging ----
 
